@@ -1,7 +1,7 @@
 {
   "name": "oculis",
   "productName": "Oculis",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "极简只读 Markdown 浏览器, GitHub 风格",
   "type": "module",
   "main": "src/main.js",
