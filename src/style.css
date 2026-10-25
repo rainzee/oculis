@@ -38,6 +38,54 @@ body {
   background: transparent;
 }
 
+/* Pele 图表, 配色取自 GitHub Primer */
+.markdown-body .mermaid-diagram {
+  margin-bottom: 16px;
+  --pele-bg: #ffffff;
+  --pele-fg: #1f2328;
+  --pele-muted: #59636e;
+  --pele-line: #59636e;
+  --pele-surface: #f6f8fa;
+  --pele-surface-alt: #eff2f5;
+  --pele-border: #d1d9e0;
+  --pele-accent: #0969da;
+  --pele-critical: #d1242f;
+  --pele-error: #d1242f;
+  --pele-radius: 6px;
+  --pele-series-1: #0969da;
+  --pele-series-2: #bc4c00;
+  --pele-series-3: #1a7f37;
+  --pele-series-4: #cf222e;
+  --pele-series-5: #8250df;
+  --pele-series-6: #9a6700;
+  --pele-series-7: #bf3989;
+  --pele-series-8: #1b7c83;
+  --pele-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  .markdown-body .mermaid-diagram {
+    --pele-bg: #0d1117;
+    --pele-fg: #f0f6fc;
+    --pele-muted: #9198a1;
+    --pele-line: #9198a1;
+    --pele-surface: #151b23;
+    --pele-surface-alt: #212830;
+    --pele-border: #3d444d;
+    --pele-accent: #4493f8;
+    --pele-critical: #f85149;
+    --pele-error: #f85149;
+    --pele-series-1: #4493f8;
+    --pele-series-2: #db6d28;
+    --pele-series-3: #3fb950;
+    --pele-series-4: #f85149;
+    --pele-series-5: #ab7df8;
+    --pele-series-6: #d29922;
+    --pele-series-7: #db61a2;
+    --pele-series-8: #39c5cf;
+  }
+}
+
 .markdown-body li:has(> input[type='checkbox']) {
   list-style: none;
 }

@@ -7,6 +7,7 @@
 - [文本](#文本)
 - [列表](#列表)
 - [代码](#代码)
+- [图表](#图表)
 - [表格](#表格)
 - [提示块](#提示块)
 - [引用](#引用)
@@ -101,6 +102,146 @@ const greet = (user: User): string => `Hello, ${user.name}!`
 
 ```js
 const veryLongLine = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+```
+
+## 图表
+
+`mermaid` 代码块由 [Pele](https://pele.run/) 渲染为 SVG, 配色跟随亮色 / 暗色主题, 窗口变窄时自动重排, 双击或 <kbd>Ctrl</kbd> + 滚轮缩放.
+
+### 流程图
+
+```mermaid
+flowchart LR
+  A[打开文件] --> B{是 Markdown?}
+  B -- 是 --> C[渲染 HTML]
+  B -- 否 --> D[交给系统打开]
+  C --> E([显示])
+  subgraph 监听
+    F[文件变更]
+  end
+  F --> C
+```
+
+### 时序图
+
+```mermaid
+sequenceDiagram
+  autonumber
+  participant U as 用户
+  participant M as 主进程
+  participant R as 渲染进程
+  U->>M: 拖入 README.md
+  M->>M: marked 解析
+  M-->>R: render(html)
+  R->>R: Pele 挂载图表
+  Note over R: 无脚本执行
+  R-->>U: 显示
+```
+
+### 类图
+
+```mermaid
+classDiagram
+  class Viewer {
+    +String currentFile
+    +openFile(path) void
+    -watchFile(path) void
+  }
+  class Renderer {
+    +renderMarkdown(source) String
+  }
+  Viewer --> Renderer : uses
+```
+
+### 状态图
+
+```mermaid
+stateDiagram-v2
+  [*] --> Empty
+  Empty --> Viewing : 打开文件
+  Viewing --> Viewing : 文件变更
+  Viewing --> [*] : 关闭
+```
+
+### ER 图
+
+```mermaid
+erDiagram
+  USER ||--o{ DOCUMENT : opens
+  DOCUMENT ||--|{ HEADING : contains
+  DOCUMENT {
+    string path
+    int size
+  }
+```
+
+### 甘特图
+
+```mermaid
+gantt
+  title 发布计划
+  dateFormat YYYY-MM-DD
+  section 开发
+    渲染      :done, a1, 2026-10-01, 7d
+    图表      :active, a2, after a1, 5d
+  section 发布
+    打包      :crit, b1, after a2, 3d
+```
+
+### 饼图
+
+```mermaid
+pie title 依赖体积
+  "electron" : 70
+  "highlight.js" : 15
+  "pele" : 10
+  "marked" : 5
+```
+
+### Git 图
+
+```mermaid
+gitGraph
+  commit
+  branch feature
+  checkout feature
+  commit
+  commit
+  checkout main
+  merge feature
+  commit
+```
+
+### 思维导图
+
+```mermaid
+mindmap
+  root((Oculis))
+    渲染
+      GFM
+      代码高亮
+      图表
+    交互
+      拖放
+      自动刷新
+```
+
+### 语法错误
+
+下面的图表有语法错误, 应显示错误信息而不是空白或崩溃:
+
+```mermaid
+flowchart LR
+  A --> 
+```
+
+### 非图表代码块
+
+语言为 `text` 的同样内容应按普通代码块显示:
+
+```text
+flowchart LR
+  A --> B
 ```
 
 ## 表格

@@ -7,10 +7,25 @@ if (!base) {
   document.head.prepend(base)
 }
 
+let diagrams = []
+
+/** 用 Pele 将 mermaid 代码块挂载为可缩放, 自适应宽度的 SVG 图表 */
+function mountDiagrams() {
+  for (const d of diagrams) d.destroy()
+  diagrams = []
+  for (const pre of content.querySelectorAll('pre.mermaid')) {
+    const container = document.createElement('div')
+    container.className = 'mermaid-diagram'
+    pre.replaceWith(container)
+    diagrams.push(window.pele.mount(container, pre.textContent))
+  }
+}
+
 window.oculis.onRender(({ html, baseUrl, keepScroll }) => {
   const scroll = keepScroll ? window.scrollY : 0
   base.href = baseUrl
   content.innerHTML = html
+  mountDiagrams()
   content.hidden = false
   empty.hidden = true
   window.scrollTo(0, scroll)

@@ -16,7 +16,8 @@
     "marked-alert": "^2.1.2",
     "marked-footnote": "^1.4.0",
     "marked-gfm-heading-id": "^4.1.4",
-    "marked-highlight": "^2.2.4"
+    "marked-highlight": "^2.2.4",
+    "pele": "^1.10.0"
   },
   "devDependencies": {
     "electron": "^45.0.0",
