@@ -16,7 +16,7 @@ export const EYE_CLOSED = 'M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z'
 export const LID_CLOSED = 'M8 32 C20 48 44 48 56 32'
 
 // 字标, 单线几何, 线宽 5, x 高 24, 升部 36, 基线 y 36
-const WORD = `
+export const WORD = `
     <g fill="none" stroke="currentColor" stroke-width="5">
       <circle cx="12" cy="24" r="9.5" />
       <path d="M48.28 30.11 A 9.5 9.5 0 1 1 48.28 17.89" />
