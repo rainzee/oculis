@@ -193,7 +193,7 @@ gantt
 ```mermaid
 pie title 依赖体积
   "electron" : 70
-  "highlight.js" : 15
+  "@pierre/highlights" : 15
   "pele" : 10
   "marked" : 5
 ```
