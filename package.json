@@ -1,7 +1,7 @@
 {
   "name": "oculis",
   "productName": "Oculis",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "A minimalist, read-only Markdown viewer. Opinionated, GitHub by default.",
   "type": "module",
   "main": "src/main.js",
