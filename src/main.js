@@ -94,6 +94,8 @@ function createWindow() {
     show: false,
     autoHideMenuBar: true,
     backgroundColor: nativeTheme.shouldUseDarkColors ? '#0d1117' : '#ffffff',
+    // 打包后图标来自可执行文件, 开发时用 build/icon.png
+    icon: app.isPackaged ? undefined : path.join(here, '..', 'build', 'icon.png'),
     webPreferences: {
       preload: path.join(here, 'preload.cjs'),
       contextIsolation: true,

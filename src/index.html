@@ -15,10 +15,22 @@
     <script src="./renderer.js" defer></script>
   </head>
   <body>
+    <!-- 眼睛几何见 scripts/brand.js, 空窗口时闭眼 -->
     <main id="empty" class="empty">
+      <svg class="eye" viewBox="0 0 64 64" aria-hidden="true"><path class="lid" /></svg>
       <p>拖入 Markdown 文件, 或按 <kbd>Ctrl</kbd> + <kbd>O</kbd> 打开</p>
     </main>
     <article id="content" class="markdown-body" hidden></article>
-    <div class="drop" aria-hidden="true"><div class="drop-frame">松开以打开</div></div>
+    <!-- 拖入文件时睁眼, 瞳孔被眼形裁切, 上眼睑抬起时露出 -->
+    <div class="drop" aria-hidden="true">
+      <div class="drop-frame">
+        <svg class="eye" viewBox="0 0 64 64">
+          <clipPath id="drop-eye"><path class="lid" /></clipPath>
+          <circle class="pupil" cx="32" cy="32" r="8" clip-path="url(#drop-eye)" />
+          <path class="lid" />
+        </svg>
+        <p>松开以打开</p>
+      </div>
+    </div>
   </body>
 </html>
