@@ -43,19 +43,26 @@ document.addEventListener('click', (e) => {
   target?.scrollIntoView()
 })
 
-let dragDepth = 0
+const isFileDrag = (e) => e.dataTransfer?.types.includes('Files')
+const setDragging = (on) => document.body.classList.toggle('dragging', on)
+
 document.addEventListener('dragenter', (e) => {
+  if (!isFileDrag(e)) return
   e.preventDefault()
-  if (++dragDepth === 1) document.body.classList.add('dragging')
+  setDragging(true)
 })
-document.addEventListener('dragleave', () => {
-  if (--dragDepth === 0) document.body.classList.remove('dragging')
+document.addEventListener('dragover', (e) => {
+  if (!isFileDrag(e)) return
+  e.preventDefault()
+  e.dataTransfer.dropEffect = 'copy'
 })
-document.addEventListener('dragover', (e) => e.preventDefault())
+// relatedTarget 为 null 说明拖离了窗口, 元素之间移动不会隐藏遮罩
+document.addEventListener('dragleave', (e) => {
+  if (!e.relatedTarget) setDragging(false)
+})
 document.addEventListener('drop', (e) => {
   e.preventDefault()
-  dragDepth = 0
-  document.body.classList.remove('dragging')
+  setDragging(false)
   const file = e.dataTransfer.files[0]
   if (file) window.oculis.openFile(file)
 })
