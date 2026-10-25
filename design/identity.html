@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Oculis — Visual Identity</title>
+    <style>
+      :root {
+        --iris: #2b44ff;
+        --iris-light: #7d8cff;
+        --ink: #0d1117;
+        --ink-2: #1f2328;
+        --graphite: #59636e;
+        --mist: #d1d9e0;
+        --paper: #ffffff;
+        --paper-2: #f6f8fa;
+        --sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+        --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+      }
+
+      * { box-sizing: border-box; }
+      body { margin: 0; font: 16px/1.6 var(--sans); color: var(--ink-2); background: var(--paper); -webkit-font-smoothing: antialiased; }
+
+      section { padding: 96px max(48px, calc((100vw - 1120px) / 2)); }
+      section + section { border-top: 1px solid var(--mist); }
+      .dark { background: var(--ink); color: #f0f6fc; border-color: #3d444d !important; }
+
+      .eyebrow { font: 600 12px/1 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--graphite); margin: 0 0 16px; }
+      .dark .eyebrow { color: #9198a1; }
+      h2 { font-size: 40px; line-height: 1.1; font-weight: 800; letter-spacing: -0.03em; margin: 0 0 16px; }
+      .lede { max-width: 640px; color: var(--graphite); font-size: 18px; margin: 0 0 56px; }
+      .dark .lede { color: #9198a1; }
+      code { font: 13px var(--mono); background: var(--paper-2); padding: 2px 6px; border-radius: 4px; }
+
+      /* marks inherit color, the pupil reads --pupil across the <use> boundary */
+      .ink { color: var(--ink); --pupil: var(--iris); }
+      .white { color: #fff; --pupil: #fff; }
+      .white-iris { color: #fff; --pupil: var(--iris-light); }
+
+      /* Hero */
+      .hero { min-height: 92vh; display: flex; flex-direction: column; justify-content: center; gap: 48px; background: var(--iris); color: #fff; border: 0 !important; }
+      .hero .lockup { width: min(640px, 80vw); height: auto; overflow: visible; }
+      .hero h1 { font-size: 22px; font-weight: 400; max-width: 640px; margin: 0; opacity: 0.9; }
+      .hero h1 b { font-weight: 800; }
+      .hero .meta { font: 500 13px var(--mono); opacity: 0.7; letter-spacing: 0.04em; }
+
+      /* Concept: three states */
+      .states { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .state { margin: 0; border-radius: 16px; background: var(--paper-2); padding: 40px 24px 24px; display: grid; justify-items: center; gap: 24px; }
+      .state svg { width: 160px; height: 160px; }
+      .state figcaption { text-align: center; }
+      .state b { display: block; font-size: 18px; }
+      .state span { color: var(--graphite); font-size: 14px; }
+      .state .verb { font: 600 11px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--iris); }
+
+      /* Construction */
+      .construction { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: center; }
+      .construction figure { margin: 0; background: var(--paper-2); border-radius: 16px; padding: 32px; }
+      .construction svg { width: 100%; height: auto; display: block; }
+      .notes { display: grid; gap: 24px; }
+      .notes h3 { margin: 0 0 4px; font-size: 16px; font-weight: 700; }
+      .notes p { margin: 0; color: var(--graphite); }
+      .notes .ratio-big { font: 800 56px/1 var(--sans); letter-spacing: -0.03em; color: var(--ink); margin: 0 0 8px; }
+
+      /* Ideas */
+      .ideas { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .idea { margin: 0; border: 1px solid var(--mist); border-radius: 16px; overflow: hidden; display: flex; flex-direction: column; }
+      .idea .stage { background: var(--paper-2); height: 240px; display: flex; justify-content: center; align-items: center; }
+      .idea figcaption { padding: 20px; display: grid; gap: 6px; }
+      .idea figcaption b { font-size: 16px; }
+      .idea figcaption span { color: var(--graphite); font-size: 14px; }
+      .idea.chosen { border: 2px solid var(--iris); }
+      .tag { font: 600 11px var(--mono); color: var(--iris); letter-spacing: 0.08em; text-transform: uppercase; margin-left: 8px; }
+
+      /* Motion */
+      .motion { display: grid; gap: 16px; }
+      .loop { border-radius: 16px; background: var(--ink); display: grid; place-items: center; min-height: 320px; position: relative; }
+      .loop svg { width: 200px; height: 200px; }
+      .caption { position: absolute; left: 20px; bottom: 16px; font: 500 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: #9198a1; }
+      .moments { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .moment { margin: 0; border-radius: 16px; border: 1px solid var(--mist); overflow: hidden; display: flex; flex-direction: column; }
+      .moment .screen { flex: 1; min-height: 240px; display: grid; place-items: center; position: relative; background: #fff; }
+      .moment .screen svg { width: 96px; height: 96px; }
+      .moment .screen .hint { position: absolute; bottom: 28px; font: 13px var(--sans); color: var(--graphite); }
+      .moment .screen.drop::after { content: ''; position: absolute; inset: 12px; border: 2px dashed var(--graphite); border-radius: 10px; }
+      .moment .screen.drop { background: color-mix(in srgb, #fff 70%, #dfe5ec); }
+      .moment .doc { width: 100%; padding: 28px; display: grid; gap: 8px; align-self: start; }
+      .moment .doc .line { height: 8px; border-radius: 4px; background: #e6eaef; }
+      .moment figcaption { padding: 14px 16px; border-top: 1px solid var(--mist); display: grid; gap: 2px; }
+      .moment figcaption b { font-size: 14px; }
+      .moment figcaption span { font-size: 13px; color: var(--graphite); }
+      .try { margin-top: 16px; font: 12px var(--mono); color: var(--graphite); }
+
+      /* Lockups */
+      .specimen { margin: 0 0 16px; background: var(--paper-2); border-radius: 16px; padding: 48px; }
+      .specimen svg { width: 100%; height: auto; display: block; }
+      .variants { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+      .tile { aspect-ratio: 4 / 3; border-radius: 16px; display: flex; align-items: center; justify-content: center; position: relative; }
+      .tile .lockup { width: 58%; height: auto; }
+      .tile .label { position: absolute; left: 16px; bottom: 12px; font: 500 11px var(--mono); letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.55; }
+      .t-paper { background: var(--paper-2); }
+      .t-ink { background: var(--ink); color: #fff; }
+      .t-iris { background: var(--iris); color: #fff; }
+
+      /* App icon */
+      .icons { display: flex; align-items: flex-end; gap: 40px; flex-wrap: wrap; }
+      .icons figure { margin: 0; display: grid; justify-items: center; gap: 12px; }
+      .icons figcaption { font: 12px var(--mono); color: #9198a1; }
+      .app-icon { display: block; filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.12)) drop-shadow(0 8px 24px rgb(0 0 0 / 0.18)); }
+      .app-icon.small { filter: none; }
+      .contexts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 64px; }
+      .dock { border-radius: 16px; padding: 48px 24px 24px; display: flex; justify-content: center; align-items: flex-end; background: linear-gradient(160deg, #c9d3e6, #8ea0c2); min-height: 220px; }
+      .dock .bar { display: flex; gap: 10px; padding: 10px; border-radius: 22px; background: rgb(255 255 255 / 0.35); backdrop-filter: blur(20px); border: 1px solid rgb(255 255 255 / 0.4); }
+      .dock .app { width: 64px; height: 64px; border-radius: 15px; }
+      .taskbar { border-radius: 16px; min-height: 220px; display: flex; flex-direction: column; justify-content: flex-end; background: linear-gradient(160deg, #1b2440, #0b0f1c); overflow: hidden; }
+      .taskbar .bar { height: 56px; display: flex; justify-content: center; align-items: center; gap: 6px; background: rgb(32 32 40 / 0.85); border-top: 1px solid rgb(255 255 255 / 0.08); }
+      .taskbar .slot { width: 44px; height: 44px; border-radius: 6px; display: grid; place-items: center; position: relative; }
+      .taskbar .slot.active { background: rgb(255 255 255 / 0.08); }
+      .taskbar .slot.active::after { content: ''; position: absolute; bottom: 2px; width: 16px; height: 3px; border-radius: 2px; background: var(--iris-light); }
+      .taskbar .slot .ph { width: 24px; height: 24px; border-radius: 5px; background: rgb(255 255 255 / 0.18); }
+      .window-chrome { margin: 24px auto 0; width: 78%; flex: 1; border-radius: 8px 8px 0 0; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+      .window-chrome .titlebar { height: 32px; display: flex; align-items: center; gap: 8px; padding: 0 12px; font: 12px var(--sans); color: var(--ink-2); border-bottom: 1px solid var(--mist); }
+      .window-chrome .body { padding: 14px 18px; display: grid; gap: 8px; }
+      .window-chrome .line { height: 8px; border-radius: 4px; background: #e6eaef; }
+
+      /* Color */
+      .palette { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 16px; }
+      .swatch { border-radius: 16px; overflow: hidden; border: 1px solid var(--mist); display: flex; flex-direction: column; }
+      .swatch .chip { flex: 1; min-height: 200px; padding: 20px; display: flex; align-items: flex-end; font-weight: 800; font-size: 22px; letter-spacing: -0.02em; }
+      .swatch dl { margin: 0; padding: 16px 20px; display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; font: 12px var(--mono); }
+      .swatch dt { color: var(--graphite); }
+      .swatch dd { margin: 0; }
+      .pairs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 16px; }
+      .pair { border-radius: 12px; padding: 20px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; }
+      .pair small { font: 500 12px var(--mono); opacity: 0.8; }
+
+      /* History */
+      .history { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+      .history figure { margin: 0; border: 1px solid var(--mist); border-radius: 16px; overflow: hidden; }
+      .history .stage { background: var(--paper-2); display: grid; place-items: center; height: 160px; }
+      .history svg { width: 88px; height: 88px; }
+      .history figcaption { padding: 14px 16px; display: grid; gap: 2px; }
+      .history figcaption span { font-size: 13px; color: var(--graphite); }
+      .history .now { border: 2px solid var(--iris); }
+
+      footer { padding: 40px max(48px, calc((100vw - 1120px) / 2)); font: 12px var(--mono); color: var(--graphite); border-top: 1px solid var(--mist); display: flex; justify-content: space-between; }
+    </style>
+  </head>
+  <body>
+    <!--
+      Geometry, 64 grid, unit u = 4 (the stroke)
+      - lids: arcs of two equal circles, r = 30, centers at (32, 14) and (32, 50)
+        center, tip and midpoint form a 3 : 4 : 5 triangle (18, 24, 30), so tips land on (8, 32) and (56, 32)
+        drawn as cubics with handles (12, 16) from each tip, which is the exact quarter-tangent length for this arc
+      - eye is 48 x 24 on the stroke centerline, width : height = 2 : 1, centered at (32, 32)
+      - pupil: circle r = 2u, clipped by the eye so a lowering lid covers it
+      - only the upper lid moves, closed means it lies on the lower lid
+    -->
+    <svg width="0" height="0" style="position: absolute">
+      <defs>
+        <!-- line mark -->
+        <symbol id="eye" viewBox="0 0 64 64">
+          <path d="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="miter" />
+          <circle cx="32" cy="32" r="8" style="fill: var(--pupil, #2b44ff)" />
+        </symbol>
+        <!-- solid mark, the almond is filled, the pupil is cut in brand color -->
+        <symbol id="eye-solid" viewBox="0 0 64 64">
+          <path d="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" fill="currentColor" stroke="currentColor" stroke-width="4" stroke-linejoin="miter" />
+          <circle cx="32" cy="32" r="8" style="fill: var(--pupil, #2b44ff)" />
+        </symbol>
+
+        <!-- blink loop: open, hold, the upper lid drops onto the lower lid, opens again -->
+        <clipPath id="blink-clip">
+          <path d="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z">
+            <animate attributeName="d" dur="4s" repeatCount="indefinite" calcMode="spline"
+              keyTimes="0;0.86;0.92;1" keySplines="0 0 1 1;0.55 0 1 1;0 0 0.25 1"
+              values="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z;M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z;M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z;M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" />
+          </path>
+        </clipPath>
+        <symbol id="eye-blink" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="8" clip-path="url(#blink-clip)" style="fill: var(--pupil, #2b44ff)" />
+          <path d="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="miter">
+              <animate attributeName="d" dur="4s" repeatCount="indefinite" calcMode="spline"
+                keyTimes="0;0.86;0.92;1" keySplines="0 0 1 1;0.55 0 1 1;0 0 0.25 1"
+                values="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z;M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z;M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z;M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" />
+            </path>
+        </symbol>
+
+        <!-- wordmark, monoline, stroke 5, x-height 24, ascender 36, baseline y 36 -->
+        <g id="word-o"><circle cx="12" cy="24" r="9.5" fill="none" stroke="currentColor" stroke-width="5" /></g>
+        <g id="word-rest">
+          <g fill="none" stroke="currentColor" stroke-width="5">
+            <path d="M48.28 30.11 A 9.5 9.5 0 1 1 48.28 17.89" />
+            <path d="M57.5 12 V 24 A 9.5 9.5 0 0 0 76.5 24 M76.5 12 V 36" />
+            <path d="M86.5 0 V 36" />
+            <path d="M96.5 12 V 36" />
+            <path d="M115.36 16.875 A 4.75 4.75 0 1 0 111.25 24 A 4.75 4.75 0 1 1 107.14 31.125" />
+          </g>
+          <circle cx="96.5" cy="4.5" r="3" fill="currentColor" />
+        </g>
+
+        <!--
+          lockup in wordmark units, the eye at stroke 5 (scale 1.25 of the 64 grid)
+          the eye is as tall as the ascender and stands on the baseline: y 1..36
+        -->
+        <symbol id="lockup" viewBox="0 0 195 36">
+          <path d="M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="miter" />
+          <circle cx="33.1" cy="18.5" r="10" style="fill: var(--pupil, #2b44ff)" />
+          <g transform="translate(76.2 0)"><use href="#word-o" /><use href="#word-rest" /></g>
+        </symbol>
+
+        <!-- idea B: the eye replaces the o, sized to the x-height with the same 2 : 1 almond -->
+        <symbol id="logotype-eye-o" viewBox="0 0 139 36">
+          <path d="M3.1 24 C12.6 11.33 31.6 11.33 41.1 24 C31.6 36.67 12.6 36.67 3.1 24 Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="miter" />
+          <circle cx="22.1" cy="24" r="5" style="fill: var(--pupil, #2b44ff)" />
+          <g transform="translate(20.2 0)"><use href="#word-rest" /></g>
+        </symbol>
+
+        <symbol id="icon" viewBox="0 0 1024 1024">
+          <rect width="1024" height="1024" rx="230" fill="#2b44ff" />
+          <use href="#eye-solid" x="134" y="134" width="756" height="756" style="color: #fff; --pupil: #2b44ff" />
+        </symbol>
+      </defs>
+    </svg>
+
+    <!-- Hero: the eye opens once on load -->
+    <section class="hero">
+      <svg class="lockup white" viewBox="0 0 195 36">
+        <defs>
+          <clipPath id="hero-clip">
+            <path d="M3.1 18.5 C18.1 38.5 48.1 38.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z">
+              <animate attributeName="d" begin="0.6s" dur="0.9s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.2 0 0 1"
+                values="M3.1 18.5 C18.1 38.5 48.1 38.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z;M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" />
+            </path>
+          </clipPath>
+        </defs>
+        <circle cx="33.1" cy="18.5" r="10" fill="#fff" clip-path="url(#hero-clip)" />
+        <path d="M3.1 18.5 C18.1 38.5 48.1 38.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" fill="none" stroke="#fff" stroke-width="5" stroke-linejoin="miter">
+            <animate attributeName="d" begin="0.6s" dur="0.9s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.2 0 0 1"
+              values="M3.1 18.5 C18.1 38.5 48.1 38.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z;M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" />
+          </path>
+        <g transform="translate(76.2 0)"><use href="#word-o" /><use href="#word-rest" /></g>
+      </svg>
+      <h1><b>Open is the only verb.</b> A minimalist, read-only Markdown viewer. Opinionated, GitHub by default.</h1>
+      <span class="meta">VISUAL IDENTITY · v3 · 2026</span>
+    </section>
+
+    <!-- 01 Concept -->
+    <section>
+      <p class="eyebrow">01 — Concept</p>
+      <h2>Open is the only verb.</h2>
+      <p class="lede">
+        Oculis cannot edit, format or save. The one thing it does is open. So the identity is built on
+        a single gesture, the moment of opening one's eyes: nothing is loaded, something arrives, you
+        are reading. The same gesture is the mark, the motion and the product's empty state.
+      </p>
+      <div class="states">
+        <figure class="state">
+          <svg viewBox="0 0 64 64" class="ink">
+            <path d="M8 32 C20 48 44 48 56 32" fill="none" stroke="currentColor" stroke-width="4" />
+          </svg>
+          <figcaption><span class="verb">Closed</span><b>Nothing to read</b><span>The upper lid rests on the lower. Empty window.</span></figcaption>
+        </figure>
+        <figure class="state">
+          <svg viewBox="0 0 64 64" class="ink">
+            <defs><clipPath id="half-clip"><path d="M8 32 C20 32 44 32 56 32 C44 48 20 48 8 32 Z" /></clipPath></defs>
+            <circle cx="32" cy="32" r="8" fill="#2b44ff" clip-path="url(#half-clip)" />
+            <g fill="none" stroke="currentColor" stroke-width="4">
+              <path d="M8 32 C20 48 44 48 56 32" />
+              <path d="M8 32 C20 32 44 32 56 32" />
+            </g>
+          </svg>
+          <figcaption><span class="verb">Opening</span><b>A file arrives</b><span>Dragged in, or picked from a dialog.</span></figcaption>
+        </figure>
+        <figure class="state">
+          <svg viewBox="0 0 64 64" class="ink"><use href="#eye" /></svg>
+          <figcaption><span class="verb">Open</span><b>Reading</b><span>The document is on screen. This is the mark.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 02 Mark -->
+    <section>
+      <p class="eyebrow">02 — Mark</p>
+      <h2>An open eye, on a 3 : 4 : 5 triangle.</h2>
+      <p class="lede">
+        Each lid is an arc of the same circle. Placing the circles so that center, eye corner and
+        midpoint form a 3 : 4 : 5 right triangle gives an almond exactly twice as wide as it is tall,
+        with every key point on a whole number of the grid.
+      </p>
+      <div class="construction">
+        <figure>
+          <svg viewBox="-1 -17 66 98">
+            <g stroke="#2b44ff" stroke-opacity="0.16" stroke-width="0.12">
+              <path d="M0 0H64M0 4H64M0 8H64M0 12H64M0 16H64M0 20H64M0 24H64M0 28H64M0 32H64M0 36H64M0 40H64M0 44H64M0 48H64M0 52H64M0 56H64M0 60H64M0 64H64" />
+              <path d="M0 0V64M4 0V64M8 0V64M12 0V64M16 0V64M20 0V64M24 0V64M28 0V64M32 0V64M36 0V64M40 0V64M44 0V64M48 0V64M52 0V64M56 0V64M60 0V64M64 0V64" />
+            </g>
+            <g fill="none" stroke="#2b44ff" stroke-width="0.25" stroke-dasharray="0.8 0.8">
+              <circle cx="32" cy="50" r="30" />
+              <circle cx="32" cy="14" r="30" />
+              <circle cx="32" cy="32" r="8" />
+            </g>
+            <use href="#eye" class="ink" width="64" height="64" style="opacity: 0.94" />
+            <g stroke="#2b44ff" stroke-width="0.35" fill="none">
+              <path d="M32 50 L8 32 L32 32 Z" />
+            </g>
+            <g fill="#2b44ff">
+              <circle cx="32" cy="50" r="0.8" /><circle cx="32" cy="14" r="0.8" />
+              <circle cx="8" cy="32" r="0.8" /><circle cx="56" cy="32" r="0.8" />
+            </g>
+            <g font-family="ui-monospace, Consolas, monospace" font-size="2.2" fill="#2b44ff">
+              <text x="16" y="30.6">24 · 4</text>
+              <text x="33" y="48">18 · 3</text>
+              <text x="12" y="45">30 · 5</text>
+              <text x="33.5" y="52.5">c₁ 32,50</text>
+              <text x="33.5" y="13">c₂ 32,14</text>
+            </g>
+          </svg>
+        </figure>
+        <div class="notes">
+          <div><p class="ratio-big">3 : 4 : 5</p><p>Center to corner, half width, radius. Scaled by 6: 18, 24, 30.</p></div>
+          <div><h3>Lids</h3><p>Two arcs of radius 30, centers at <code>(32,14)</code> and <code>(32,50)</code>. Corners land on <code>(8,32)</code> and <code>(56,32)</code>, sharp miter joins.</p></div>
+          <div><h3>Almond</h3><p>48 × 24 on the stroke centerline, exactly 2 : 1, centered on the grid at <code>(32,32)</code>.</p></div>
+          <div><h3>Pupil</h3><p>A full circle of radius <code>2u</code>, centered, looking straight at you. It is the only brand color in the mark.</p></div>
+          <div><h3>Stroke</h3><p><code>u = 4</code>. The lids keep the 1 : 2 stroke-to-pupil ratio from v2.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 03 Ideas -->
+    <section>
+      <p class="eyebrow">03 — Ideas</p>
+      <h2>Three ways to open.</h2>
+      <p class="lede">Iterations within the same concept. A carries the system, B and C are kept as options.</p>
+      <div class="ideas">
+        <figure class="idea chosen">
+          <div class="stage"><svg width="140" height="140" class="ink"><use href="#eye" /></svg></div>
+          <figcaption><b>A · Open <span class="tag">Proposed</span></b><span>The plain open eye, pupil centered. Strongest as an icon and the natural end state of the motion.</span></figcaption>
+        </figure>
+        <figure class="idea">
+          <div class="stage"><svg viewBox="0 0 139 36" width="250" height="65" class="ink"><use href="#logotype-eye-o" /></svg></div>
+          <figcaption><b>B · The eye is the O</b><span>The almond replaces the first letter. One shape does both jobs. Best for large typographic uses, weaker at small sizes.</span></figcaption>
+        </figure>
+        <figure class="idea">
+          <div class="stage">
+            <svg width="140" height="140" viewBox="0 0 64 64" class="ink">
+              <defs><clipPath id="gaze-clip"><path d="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" /></clipPath></defs>
+              <circle cx="32" cy="36" r="8" fill="#2b44ff" clip-path="url(#gaze-clip)" />
+              <path d="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" fill="none" stroke="currentColor" stroke-width="4" />
+            </svg>
+          </div>
+          <figcaption><b>C · Reading gaze</b><span>The pupil drops 1u to rest on the lower lid: open, and looking down at the page. Quieter, more specific.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 04 Motion -->
+    <section>
+      <p class="eyebrow">04 — Motion</p>
+      <h2>Only the upper lid moves.</h2>
+      <p class="lede">
+        The pupil is clipped by the almond, so a lowering lid covers it the way a real eyelid would.
+        Closing lays the upper lid onto the lower one. No scaling, no fading, one curve in motion.
+      </p>
+      <div class="motion">
+        <div class="loop">
+          <svg class="white-iris"><use href="#eye-blink" /></svg>
+          <span class="caption">Blink · 4 s loop · 240 ms close</span>
+        </div>
+        <div class="moments">
+          <figure class="moment">
+            <div class="screen">
+              <svg viewBox="0 0 64 64" class="ink" style="color: #8c959f"><path d="M8 32 C20 48 44 48 56 32" fill="none" stroke="currentColor" stroke-width="4" /></svg>
+              <span class="hint">Drop a Markdown file</span>
+            </div>
+            <figcaption><b>Empty</b><span>Eye closed, in graphite.</span></figcaption>
+          </figure>
+          <figure class="moment" id="demo">
+            <div class="screen drop">
+              <svg viewBox="0 0 64 64" class="ink">
+                <defs>
+                  <clipPath id="demo-clip">
+                    <path d="M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z">
+                      <animate id="demo-open-clip" attributeName="d" begin="indefinite" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.2 0 0 1"
+                        values="M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z;M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" />
+                      <animate id="demo-close-clip" attributeName="d" begin="indefinite" dur="0.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 1 1"
+                        values="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z;M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z" />
+                    </path>
+                  </clipPath>
+                </defs>
+                <circle cx="32" cy="32" r="8" fill="#2b44ff" clip-path="url(#demo-clip)" />
+                <path d="M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z" fill="none" stroke="currentColor" stroke-width="4" stroke-linejoin="miter">
+                    <animate id="demo-open" attributeName="d" begin="indefinite" dur="0.5s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.2 0 0 1"
+                      values="M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z;M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z" />
+                    <animate id="demo-close" attributeName="d" begin="indefinite" dur="0.3s" fill="freeze" calcMode="spline" keyTimes="0;1" keySplines="0.4 0 1 1"
+                      values="M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z;M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z" />
+                  </path>
+              </svg>
+              <span class="hint">Release to open</span>
+            </div>
+            <figcaption><b>Dragging</b><span>The eye opens as a file enters the window.</span></figcaption>
+          </figure>
+          <figure class="moment">
+            <div class="screen">
+              <div class="doc">
+                <div class="line" style="width: 46%; height: 14px; background: #d1d9e0"></div>
+                <div class="line" style="width: 94%"></div><div class="line" style="width: 88%"></div><div class="line" style="width: 70%"></div>
+                <div class="line" style="width: 92%; margin-top: 8px"></div><div class="line" style="width: 60%"></div>
+              </div>
+            </div>
+            <figcaption><b>Reading</b><span>The eye steps aside. Only the document.</span></figcaption>
+          </figure>
+        </div>
+      </div>
+      <p class="try">Hover the “Dragging” card to play the open and close.</p>
+    </section>
+
+    <!-- 05 Lockup -->
+    <section>
+      <p class="eyebrow">05 — Lockup</p>
+      <h2>As tall as the l.</h2>
+      <p class="lede">
+        The wordmark is drawn from circles and stems with the same stroke as the eye. In the lockup the
+        eye stands on the baseline and rises to the ascender, the height of the <i>l</i>.
+      </p>
+      <figure class="specimen">
+        <svg viewBox="-6 -6 207 48">
+          <g stroke="#2b44ff" stroke-width="0.2" stroke-dasharray="0.8 0.8" fill="none">
+            <path d="M-6 0 H201" /><path d="M-6 12 H201" /><path d="M-6 36 H201" />
+          </g>
+          <g font-family="ui-monospace, Consolas, monospace" font-size="2" fill="#2b44ff">
+            <text x="-5.5" y="-1">ascender</text><text x="-5.5" y="11">x-height</text><text x="-5.5" y="40">baseline</text>
+          </g>
+          <use href="#lockup" class="ink" width="195" height="36" />
+        </svg>
+      </figure>
+      <div class="variants">
+        <div class="tile t-paper"><svg class="lockup ink" viewBox="0 0 195 36"><use href="#lockup" /></svg><span class="label">On paper</span></div>
+        <div class="tile t-ink"><svg class="lockup white-iris" viewBox="0 0 195 36"><use href="#lockup" /></svg><span class="label">On ink</span></div>
+        <div class="tile t-iris"><svg class="lockup white" viewBox="0 0 195 36"><use href="#lockup" /></svg><span class="label">On iris · mono</span></div>
+      </div>
+    </section>
+
+    <!-- 06 App icon -->
+    <section class="dark">
+      <p class="eyebrow">06 — App icon</p>
+      <h2>Wide awake.</h2>
+      <p class="lede">
+        On the icon the almond is filled white and the pupil is cut out in Iris, so the tile looks back
+        at you. A solid shape holds up at 16 px without a separate small drawing.
+      </p>
+      <div class="icons">
+        <figure><svg class="app-icon" width="256" height="256"><use href="#icon" /></svg><figcaption>1024 · macOS / Store</figcaption></figure>
+        <figure><svg class="app-icon" width="128" height="128"><use href="#icon" /></svg><figcaption>128</figcaption></figure>
+        <figure><svg class="app-icon" width="64" height="64"><use href="#icon" /></svg><figcaption>64</figcaption></figure>
+        <figure><svg class="app-icon small" width="32" height="32"><use href="#icon" /></svg><figcaption>32</figcaption></figure>
+        <figure><svg class="app-icon small" width="16" height="16"><use href="#icon" /></svg><figcaption>16 · favicon</figcaption></figure>
+      </div>
+      <div class="contexts">
+        <div class="dock">
+          <div class="bar">
+            <div class="app" style="background: linear-gradient(#5ac8fa, #007aff)"></div>
+            <div class="app" style="background: linear-gradient(#ffd60a, #ff9f0a)"></div>
+            <svg class="app"><use href="#icon" /></svg>
+            <div class="app" style="background: linear-gradient(#30d158, #248a3d)"></div>
+            <div class="app" style="background: linear-gradient(#f2f2f7, #c7c7cc)"></div>
+          </div>
+        </div>
+        <div class="taskbar">
+          <div class="window-chrome">
+            <div class="titlebar"><svg width="16" height="16"><use href="#icon" /></svg>README.md</div>
+            <div class="body">
+              <div class="line" style="width: 40%; height: 14px; background: #d1d9e0"></div>
+              <div class="line" style="width: 92%"></div><div class="line" style="width: 85%"></div><div class="line" style="width: 64%"></div>
+            </div>
+          </div>
+          <div class="bar">
+            <div class="slot"><div class="ph"></div></div>
+            <div class="slot"><div class="ph"></div></div>
+            <div class="slot active"><svg width="26" height="26"><use href="#icon" /></svg></div>
+            <div class="slot"><div class="ph"></div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 Color -->
+    <section>
+      <p class="eyebrow">07 — Color</p>
+      <h2>Iris, and everything else stays GitHub.</h2>
+      <p class="lede">
+        Documents render in GitHub's own neutrals, so the brand owns exactly one color. Iris is an
+        electric ultramarine in the spirit of International Klein Blue, brightened for screens. It is the
+        pupil, the icon field, and nowhere inside a document.
+      </p>
+      <div class="palette">
+        <div class="swatch"><div class="chip" style="background: var(--iris); color: #fff">Iris</div><dl><dt>HEX</dt><dd>#2B44FF</dd><dt>RGB</dt><dd>43 68 255</dd><dt>OKLCH</dt><dd>0.515 0.271 268</dd><dt>Role</dt><dd>Pupil, icon field</dd></dl></div>
+        <div class="swatch"><div class="chip" style="background: var(--iris-light); color: var(--ink)">Iris Light</div><dl><dt>HEX</dt><dd>#7D8CFF</dd><dt>Role</dt><dd>Iris on dark</dd></dl></div>
+        <div class="swatch"><div class="chip" style="background: var(--ink); color: #fff">Ink</div><dl><dt>HEX</dt><dd>#0D1117</dd><dt>Role</dt><dd>Lids, dark canvas</dd></dl></div>
+        <div class="swatch"><div class="chip" style="background: var(--paper); color: var(--ink)">Paper</div><dl><dt>HEX</dt><dd>#FFFFFF</dd><dt>Role</dt><dd>Light canvas</dd></dl></div>
+      </div>
+      <div class="pairs">
+        <div class="pair" style="background: var(--iris); color: #fff">Aa <small>6.2 : 1 AA</small></div>
+        <div class="pair" style="background: var(--ink); color: var(--iris-light)">Aa <small>6.4 : 1 AA</small></div>
+        <div class="pair" style="background: var(--paper); color: var(--iris); border: 1px solid var(--mist)">Aa <small>6.2 : 1 AA</small></div>
+        <div class="pair" style="background: var(--paper-2); color: var(--ink)">Aa <small>17.8 : 1 AAA</small></div>
+      </div>
+    </section>
+
+    <!-- 08 History -->
+    <section>
+      <p class="eyebrow">08 — History</p>
+      <h2>The eye, opening.</h2>
+      <p class="lede">Read left to right, the iterations themselves open their eyes.</p>
+      <div class="history">
+        <figure>
+          <div class="stage">
+            <svg viewBox="0 0 64 64">
+              <path d="M6 32 C 18 12, 46 12, 58 32 C 46 52, 18 52, 6 32 Z" fill="none" stroke="#0d1117" stroke-width="5" stroke-linejoin="round" />
+              <circle cx="32" cy="32" r="9" fill="#2b44ff" />
+            </svg>
+          </div>
+          <figcaption><b>v0 · Lens</b><span>Literal, generic.</span></figcaption>
+        </figure>
+        <figure>
+          <div class="stage">
+            <svg viewBox="0 0 64 64">
+              <g fill="none" stroke="#0d1117" stroke-width="4.5" stroke-linecap="round"><path d="M8 42 C 20 22, 44 22, 56 42" /><path d="M3 42 H 61" /></g>
+              <path d="M23 42 A 9 9 0 0 1 41 42 Z" fill="#2b44ff" />
+            </svg>
+          </div>
+          <figcaption><b>v1 · Curved lid</b><span>Half closed, freehand.</span></figcaption>
+        </figure>
+        <figure>
+          <div class="stage">
+            <svg viewBox="0 0 64 64">
+              <g fill="none" stroke="#0d1117" stroke-width="4"><path d="M6 40 H 58" /><path d="M16 40 A 16 16 0 0 1 48 40" /></g>
+              <path d="M24 40 A 8 8 0 0 1 40 40 Z" fill="#2b44ff" />
+            </svg>
+          </div>
+          <figcaption><b>v2 · Geometric</b><span>Half closed, one ratio.</span></figcaption>
+        </figure>
+        <figure class="now">
+          <div class="stage"><svg class="ink"><use href="#eye" /></svg></div>
+          <figcaption><b>v3 · Open <span class="tag">Now</span></b><span>Geometric, and awake.</span></figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <footer><span>oculis · visual identity</span><span>#2B44FF</span></footer>
+
+    <script>
+      // play the drag demo on hover
+      const demo = document.getElementById('demo')
+      const play = (...ids) => ids.forEach((id) => document.getElementById(id).beginElement())
+      demo.addEventListener('mouseenter', () => play('demo-open', 'demo-open-clip'))
+      demo.addEventListener('mouseleave', () => play('demo-close', 'demo-close-clip'))
+    </script>
+  </body>
+</html>
