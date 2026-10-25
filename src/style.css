@@ -37,10 +37,9 @@ body {
   }
 }
 
-/* highlight.js 主题自带背景, 统一交给 github-markdown-css */
-.markdown-body pre code.hljs {
-  padding: 0;
-  background: transparent;
+/* Highlights 以内联样式写入主题背景, 统一交给 github-markdown-css */
+.markdown-body pre.highlights {
+  background-color: var(--bgColor-muted) !important;
 }
 
 /* Pele 图表, 配色取自 GitHub Primer */

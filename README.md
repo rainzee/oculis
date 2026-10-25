@@ -18,7 +18,7 @@ Oculis 是一个极简的只读 Markdown 浏览器. 不编辑, 不格式化, 不
 
 - GitHub Flavored Markdown: 表格, 任务列表, 删除线, 自动链接, 脚注
 - GitHub 风格的 [!NOTE] 等提示块, 标题锚点
-- 代码高亮 (highlight.js GitHub 主题)
+- 代码高亮 (@pierre/highlights, GitHub 主题)
 - Mermaid 图表, 由 [Pele](https://pele.run/) 渲染为 SVG, 自适应宽度, 可缩放
 - 跟随系统亮色 / 暗色主题
 - 文件变更自动刷新, 保持滚动位置
