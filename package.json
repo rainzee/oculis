@@ -1,0 +1,46 @@
+{
+  "name": "oculis",
+  "productName": "Oculis",
+  "version": "0.1.0",
+  "description": "极简只读 Markdown 浏览器, GitHub 风格",
+  "type": "module",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder"
+  },
+  "dependencies": {
+    "github-markdown-css": "^5.9.0",
+    "highlight.js": "^11.12.0",
+    "marked": "^18.1.1",
+    "marked-alert": "^2.1.2",
+    "marked-footnote": "^1.4.0",
+    "marked-gfm-heading-id": "^4.1.4",
+    "marked-highlight": "^2.2.4"
+  },
+  "devDependencies": {
+    "electron": "^45.0.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "dev.oculis.app",
+    "productName": "Oculis",
+    "files": ["src/**/*", "package.json"],
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown", "mdown", "mkd"],
+        "name": "Markdown",
+        "role": "Viewer"
+      }
+    ],
+    "win": {
+      "target": "nsis"
+    },
+    "mac": {
+      "target": "dmg"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
+  }
+}
