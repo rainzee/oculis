@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Oculis — Open is the only verb.</title>
+    <meta name="description" content="A minimalist, read-only Markdown viewer. Opinionated, GitHub by default." />
+    <meta name="theme-color" content="#000000" />
+    <link rel="icon" href="../assets/icon.svg" type="image/svg+xml" />
+    <script>
+      document.documentElement.classList.add('js')
+    </script>
+    <link rel="stylesheet" href="./src/style.css" />
+    <script type="module" src="./src/main.js"></script>
+  </head>
+  <body class="gated">
+    <nav class="nav inverse" id="nav">
+      <div class="col logo">
+        <div>Oculis</div>
+        <div>
+          <span class="redact">Read-only <span data-version></span></span>
+        </div>
+        <div><span class="redact late">2026</span></div>
+      </div>
+      <div class="col commit">
+        <span class="redact" data-commit hidden>
+          <button class="sha" type="button" data-sha></button>
+          <span data-pushed></span>
+        </span>
+      </div>
+      <div class="col spacer"></div>
+      <div class="col progress" data-progress>load progress 0/100%</div>
+      <div class="col links">
+        <a href="https://github.com/rainzee/oculis/releases/latest"><span class="redact">Download</span></a>
+        <a href="https://github.com/rainzee/oculis"><span class="redact late">GitHub</span></a>
+        <button type="button" data-sound><span class="redact">Sound on</span></button>
+      </div>
+    </nav>
+
+    <section class="gate" id="gate" aria-label="Enter">
+      <div class="gate-inner">
+        <h1 class="gate-title">Read only</h1>
+        <p class="gate-copy" data-tokens>
+          The following experience contains no cursor, no toolbar and no save button. If you came here to change
+          something, turn back.
+        </p>
+      </div>
+      <button class="enter" type="button" id="enter" aria-label="Open" disabled>
+        <svg viewBox="0 0 200 200" aria-hidden="true">
+          <circle class="ring ring-1" cx="100" cy="100" r="96" />
+          <circle class="ring ring-2" cx="100" cy="100" r="58" />
+          <defs><path id="ring-text" d="M100 100 m-77 0 a77 77 0 1 1 154 0 a77 77 0 1 1 -154 0" /></defs>
+          <g class="ring-text">
+            <text><textPath href="#ring-text">OPEN · OPEN · OPEN · OPEN · OPEN · OPEN ·</textPath></text>
+          </g>
+          <g transform="translate(68 68)">
+            <clipPath id="enter-eye"><path class="lid" /></clipPath>
+            <circle class="pupil" cx="32" cy="32" r="8" clip-path="url(#enter-eye)" />
+            <path class="lid" />
+          </g>
+        </svg>
+      </button>
+    </section>
+
+    <main class="stage" id="stage">
+      <div class="hint" id="hint" aria-hidden="true">
+        <svg viewBox="0 0 64 24"><path d="M8 4 C20 20 44 20 56 4" /></svg>
+        <svg viewBox="0 0 64 24"><path d="M8 4 C20 20 44 20 56 4" /></svg>
+        <svg viewBox="0 0 64 24"><path d="M8 4 C20 20 44 20 56 4" /></svg>
+      </div>
+    </main>
+
+    <section class="cta" id="cta" aria-label="Get Oculis">
+      <p>Open is the only verb.</p>
+      <div class="cta-buttons">
+        <a class="pill" href="https://github.com/rainzee/oculis/releases/latest">Download</a>
+        <a class="pill" href="https://github.com/rainzee/oculis">Source</a>
+      </div>
+    </section>
+
+    <section class="still" id="still">
+      <img src="../assets/logo-dark.svg" alt="Oculis" width="320" />
+      <p class="still-lede">
+        <b>Open is the only verb.</b> A minimalist, read-only Markdown viewer. Opinionated, GitHub by default.
+      </p>
+      <ul>
+        <li>GitHub Flavored Markdown, alerts, footnotes, heading anchors</li>
+        <li>Syntax highlighting and Mermaid diagrams</li>
+        <li>Light and dark, following the system</li>
+        <li>Live reload that keeps your scroll position</li>
+      </ul>
+      <div class="cta-buttons">
+        <a class="pill" href="https://github.com/rainzee/oculis/releases/latest">Download</a>
+        <a class="pill" href="https://github.com/rainzee/oculis">Source</a>
+      </div>
+    </section>
+  </body>
+</html>

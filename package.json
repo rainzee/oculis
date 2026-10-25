@@ -8,7 +8,9 @@
   "scripts": {
     "start": "electron .",
     "icons": "bun scripts/icons.js",
-    "dist": "electron-builder"
+    "dist": "electron-builder",
+    "site": "bun run --cwd site dev",
+    "site:build": "bun run --cwd site build"
   },
   "dependencies": {
     "@pierre/highlights": "^0.2.0",
