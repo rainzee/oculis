@@ -38,6 +38,9 @@ bun run dist             # build an installer
 | --- | --- |
 | `Ctrl+O` | Open |
 | `Ctrl+R` | Reload |
+| `Ctrl+F` | Find in page |
+| `Enter` `Shift+Enter` / `F3` `Shift+F3` | Next / previous match |
+| `Esc` | Close find |
 | `Ctrl+=` `Ctrl+-` `Ctrl+0` | Zoom |
 | `F11` | Full screen |
 | `Alt` | Show the menu |

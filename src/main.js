@@ -4,11 +4,13 @@ import { watch, existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { renderMarkdown } from './render.js'
+import { createFindBar } from './find-bar.js'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const MD_EXT = /\.(md|markdown|mdown|mkd|mkdn|mdx|txt)$/i
 
 let win = null
+let findBar = null
 let currentFile = null
 let watcher = null
 let pendingFile = findFileArg(process.argv)
@@ -114,6 +116,7 @@ function createWindow() {
     return { action: 'deny' }
   })
 
+  findBar = createFindBar(win)
   win.once('ready-to-show', () => win.show())
   win.webContents.once('did-finish-load', () => {
     if (pendingFile) openFile(pendingFile)
@@ -121,6 +124,7 @@ function createWindow() {
   })
   win.on('closed', () => {
     win = null
+    findBar = null
     watcher?.close()
   })
   win.loadFile(path.join(here, 'index.html'))
@@ -144,6 +148,7 @@ function buildMenu() {
       submenu: [
         { role: 'copy', label: '复制' },
         { role: 'selectAll', label: '全选' },
+        { label: '查找…', accelerator: 'CmdOrCtrl+F', click: () => currentFile && findBar?.open() },
         { type: 'separator' },
         { role: 'resetZoom', label: '实际大小' },
         { role: 'zoomIn', label: '放大', accelerator: 'CmdOrCtrl+=' },
@@ -177,6 +182,7 @@ if (!app.requestSingleInstanceLock()) {
 
   ipcMain.on('open-path', (_e, file) => file && openFile(file))
   ipcMain.on('open-dialog', showOpenDialog)
+  ipcMain.on('rendered', () => findBar?.refresh())
 
   app.whenReady().then(() => {
     buildMenu()

@@ -29,6 +29,7 @@ window.oculis.onRender(({ html, baseUrl, keepScroll }) => {
   content.hidden = false
   empty.hidden = true
   window.scrollTo(0, scroll)
+  window.oculis.rendered()
 })
 
 // 页内锚点直接滚动, 其余链接交给主进程处理
