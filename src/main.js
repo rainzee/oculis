@@ -37,7 +37,7 @@ async function openFile(file) {
   const sameFile = file === currentFile
   currentFile = file
   win.setTitle(path.basename(file))
-  win.setRepresentedFilename?.(file)
+  win.setRepresentedFilename(file)
   app.addRecentDocument(file)
   win.webContents.send('render', {
     html: renderMarkdown(source),
@@ -50,14 +50,10 @@ async function openFile(file) {
 function watchFile(file) {
   watcher?.close()
   let timer = null
-  try {
-    watcher = watch(file, () => {
-      clearTimeout(timer)
-      timer = setTimeout(() => existsSync(file) && file === currentFile && openFile(file), 120)
-    })
-  } catch {
-    watcher = null
-  }
+  watcher = watch(file, () => {
+    clearTimeout(timer)
+    timer = setTimeout(() => existsSync(file) && file === currentFile && openFile(file), 120)
+  })
 }
 
 async function showOpenDialog() {
@@ -68,24 +64,18 @@ async function showOpenDialog() {
       { name: '所有文件', extensions: ['*'] },
     ],
   })
-  if (!canceled && filePaths[0]) openFile(filePaths[0])
+  if (!canceled) openFile(filePaths[0])
 }
 
 /** 处理文档内链接点击: 站内 Markdown 在本窗口打开, 其他交给系统 */
 function handleLink(url) {
-  let target
-  try {
-    target = new URL(url)
-  } catch {
-    return
-  }
-  if (target.protocol === 'file:') {
-    const file = fileURLToPath(target)
-    if (MD_EXT.test(file) && existsSync(file)) return openFile(file)
-    if (existsSync(file)) return shell.openPath(file)
-    return
-  }
-  if (['http:', 'https:', 'mailto:'].includes(target.protocol)) shell.openExternal(url)
+  const { protocol } = new URL(url)
+  if (protocol === 'file:') {
+    const file = fileURLToPath(url)
+    if (!existsSync(file)) return
+    if (MD_EXT.test(file)) openFile(file)
+    else shell.openPath(file)
+  } else if (['http:', 'https:', 'mailto:'].includes(protocol)) shell.openExternal(url)
 }
 
 function createWindow() {
@@ -101,9 +91,6 @@ function createWindow() {
     icon: app.isPackaged ? undefined : path.join(here, '..', 'build', 'icon.png'),
     webPreferences: {
       preload: path.join(here, 'preload.cjs'),
-      contextIsolation: true,
-      sandbox: true,
-      nodeIntegration: false,
       spellcheck: false,
     },
   })
@@ -126,6 +113,7 @@ function createWindow() {
   win.on('closed', () => {
     win = null
     findBar = null
+    currentFile = null
     watcher?.close()
   })
   win.loadFile(path.join(here, 'index.html'))
@@ -149,7 +137,7 @@ function buildMenu() {
       submenu: [
         { role: 'copy', label: '复制' },
         { role: 'selectAll', label: '全选' },
-        { label: '查找…', accelerator: 'CmdOrCtrl+F', click: () => currentFile && findBar?.open() },
+        { label: '查找…', accelerator: 'CmdOrCtrl+F', click: () => currentFile && findBar.open() },
         { type: 'separator' },
         { role: 'resetZoom', label: '实际大小' },
         { role: 'zoomIn', label: '放大', accelerator: 'CmdOrCtrl+=' },
@@ -183,7 +171,7 @@ if (!app.requestSingleInstanceLock()) {
 
   ipcMain.on('open-path', (_e, file) => file && openFile(file))
   ipcMain.on('open-dialog', showOpenDialog)
-  ipcMain.on('rendered', () => findBar?.refresh())
+  ipcMain.on('rendered', () => findBar.refresh())
 
   app.whenReady().then(() => {
     buildMenu()

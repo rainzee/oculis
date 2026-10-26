@@ -3,7 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
-// 视图比查找栏大一圈, 给阴影留位置, 右侧让开文档滚动条
+// 视图比查找栏大一圈, 给阴影留位置, 右侧让开文档滚动条; 窗口 minWidth 保证放得下
 const WIDTH = 380
 const HEIGHT = 64
 const RIGHT = 16
@@ -42,7 +42,7 @@ export function createFindBar(win) {
 
   function layout() {
     const { width } = win.getContentBounds()
-    view.setBounds({ x: Math.max(0, width - WIDTH - RIGHT), y: 0, width: Math.min(WIDTH, width), height: HEIGHT })
+    view.setBounds({ x: width - WIDTH - RIGHT, y: 0, width: WIDTH, height: HEIGHT })
   }
 
   function createView() {
@@ -51,16 +51,13 @@ export function createFindBar(win) {
         preload: path.join(here, 'find-preload.cjs'),
         // 独立会话, 文档缩放不会波及查找栏
         partition: 'find-bar',
-        contextIsolation: true,
-        sandbox: true,
-        nodeIntegration: false,
         spellcheck: false,
       },
     })
     view.setBackgroundColor('#00000000')
     const bar = view.webContents
+    // 拖入文件会让查找栏导航到该文件
     bar.on('will-navigate', (e) => e.preventDefault())
-    bar.setWindowOpenHandler(() => ({ action: 'deny' }))
     bar.on('before-input-event', onKey)
     bar.ipc.on('query', (_e, text) => {
       query = text
@@ -71,7 +68,8 @@ export function createFindBar(win) {
     bar.loadFile(path.join(here, 'find.html'))
     win.contentView.addChildView(view)
     win.on('resize', layout)
-    win.once('closed', () => bar.isDestroyed() || bar.close())
+    // 窗口关闭不会销毁子视图的 webContents
+    win.once('closed', () => bar.close())
   }
 
   function open() {
@@ -84,7 +82,6 @@ export function createFindBar(win) {
   }
 
   function close() {
-    if (!isOpen()) return
     requestId = 0
     page.stopFindInPage('keepSelection')
     view.setVisible(false)

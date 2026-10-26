@@ -1,11 +1,7 @@
 const empty = document.getElementById('empty')
 const content = document.getElementById('content')
 
-let base = document.querySelector('base')
-if (!base) {
-  base = document.createElement('base')
-  document.head.prepend(base)
-}
+const base = document.head.appendChild(document.createElement('base'))
 
 let diagrams = []
 
@@ -44,7 +40,7 @@ document.addEventListener('click', (e) => {
   target?.scrollIntoView()
 })
 
-const isFileDrag = (e) => e.dataTransfer?.types.includes('Files')
+const isFileDrag = (e) => e.dataTransfer.types.includes('Files')
 const setDragging = (on) => document.body.classList.toggle('dragging', on)
 
 document.addEventListener('dragenter', (e) => {
@@ -64,8 +60,7 @@ document.addEventListener('dragleave', (e) => {
 document.addEventListener('drop', (e) => {
   e.preventDefault()
   setDragging(false)
-  const file = e.dataTransfer.files[0]
-  if (file) window.oculis.openFile(file)
+  window.oculis.openFile(e.dataTransfer.files[0])
 })
 
 empty.addEventListener('dblclick', () => window.oculis.openDialog())

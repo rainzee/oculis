@@ -26,7 +26,7 @@ function impulse(ctx, seconds, decay = 2.4) {
   return buffer
 }
 
-/** 创建页面音频, 必须在用户手势中调用 start */
+/** 创建页面音频, 必须在用户手势中调用一次 start, 除 speed 与 setMuted 外的方法只在 start 之后调用 */
 export function createAudio() {
   let ctx = null
   let master = null
@@ -36,8 +36,6 @@ export function createAudio() {
   let muted = false
 
   function start() {
-    const AudioContext = window.AudioContext ?? window.webkitAudioContext
-    if (ctx || !AudioContext) return
     ctx = new AudioContext()
     master = ctx.createGain()
     master.gain.value = muted ? 0 : 0.8
@@ -99,7 +97,6 @@ export function createAudio() {
 
   /** 滚动速度映射为噪声音量 */
   function scroll(delta) {
-    if (!scrub) return
     scrub.gain.cancelScheduledValues(ctx.currentTime)
     scrub.gain.setTargetAtTime(Math.min(0.09, Math.abs(delta) * 1.4), ctx.currentTime, 0.03)
     scrub.gain.setTargetAtTime(0, ctx.currentTime + 0.12, 0.12)
@@ -107,7 +104,6 @@ export function createAudio() {
 
   /** 眼睛撞墙时的失真弹响 */
   function boing() {
-    if (!ctx) return
     const now = ctx.currentTime
     const saw = ctx.createOscillator()
     const ring = ctx.createOscillator()
@@ -146,7 +142,6 @@ export function createAudio() {
 
   /** 章节切换时的短音 */
   function chime(index) {
-    if (!ctx) return
     const now = ctx.currentTime
     const f = CHIMES[index % CHIMES.length]
     for (const [type, mult, level] of [
@@ -170,7 +165,6 @@ export function createAudio() {
 
   /** 字标成形时的和弦 */
   function chord() {
-    if (!ctx) return
     const now = ctx.currentTime
     CHORD.forEach((f, i) => {
       const osc = ctx.createOscillator()

@@ -81,14 +81,13 @@ const ease = (from, to, k, f) => from + (to - from) * (1 - (1 - k) ** f)
  * 参数
  * - container: 画布的父元素
  * - audio: createAudio 的返回值
- * - hooks: onLoop(loops) 在每次滚到底部回到顶部时调用
+ * - onLoop: 每次滚到底部回到顶部时调用
  */
-export async function createScene({ container, audio, hooks = {} }) {
-  const renderer = new THREE.WebGLRenderer({ antialias: false, alpha: false, powerPreference: 'high-performance' })
+export async function createScene({ container, audio, onLoop }) {
+  const renderer = new THREE.WebGLRenderer({ powerPreference: 'high-performance' })
   const dpr = Math.min(1.5, window.devicePixelRatio)
   renderer.setPixelRatio(dpr)
   renderer.setSize(innerWidth, innerHeight)
-  renderer.setClearColor(0x000000, 1)
   const canvas = renderer.domElement
   container.append(canvas)
 
@@ -151,7 +150,7 @@ export async function createScene({ container, audio, hooks = {} }) {
     return mesh
   })
 
-  function headline(spec, { aspect = 2, segments = 100 } = {}) {
+  function headline(spec, { aspect, segments }) {
     const lines = view.narrow && spec.narrow ? spec.narrow : spec.lines
     const map = headlineTexture({ lines, source: spec.source, aspect })
     const geometry = new THREE.PlaneGeometry(1, 1 / aspect, segments, Math.max(2, Math.round(segments / aspect)))
@@ -342,7 +341,7 @@ export async function createScene({ container, audio, hooks = {} }) {
   }
 
   function onPointerUp(e) {
-    if (e.target.closest?.('a, button')) {
+    if (e.target.closest('a, button')) {
       drag = null
       return
     }
@@ -390,7 +389,7 @@ export async function createScene({ container, audio, hooks = {} }) {
     document.body.classList.toggle('is-twirling', state.stage === 4)
     canvas.style.transform = state.stage >= 3 ? 'scale(1, -1)' : ''
     audio.chord()
-    hooks.onLoop?.(state.loops)
+    onLoop()
   }
 
   const show = (mesh, on = true) => {
@@ -680,7 +679,6 @@ export async function createScene({ container, audio, hooks = {} }) {
   })
 
   return {
-    canvas,
     get progress() {
       return state.p
     },

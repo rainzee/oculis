@@ -16,13 +16,7 @@ const smooth = (a, b, x) => {
   return t * t * (3 - 2 * t)
 }
 
-function supportsWebGL() {
-  try {
-    return !!document.createElement('canvas').getContext('webgl2')
-  } catch {
-    return false
-  }
-}
+const supportsWebGL = () => !!document.createElement('canvas').getContext('webgl2')
 
 /** 最近一次提交, 拿不到就保持隐藏 */
 async function showCommit() {
@@ -84,7 +78,7 @@ async function main() {
     return createScene({
       container: document.getElementById('stage'),
       audio,
-      hooks: { onLoop: () => updateProgress() },
+      onLoop: updateProgress,
     })
   })
   await loadProgress(ready)
