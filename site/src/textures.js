@@ -15,12 +15,7 @@ export async function loadFonts() {
     new FontFace('JetBrains Mono Variable', `url(${mono})`, { weight: '100 800' }),
   ]
   for (const face of faces) document.fonts.add(face)
-  await Promise.allSettled(faces.map((face) => face.load()))
-  await Promise.all([
-    document.fonts.load(`800 64px ${SANS}`),
-    document.fonts.load(`italic 900 64px ${SANS}`),
-    document.fonts.load(`400 64px ${MONO}`),
-  ])
+  await Promise.all(faces.map((face) => face.load()))
 }
 
 function canvas(width, height) {
@@ -30,11 +25,8 @@ function canvas(width, height) {
   return [el, el.getContext('2d')]
 }
 
-function texture(el, { repeat = false, mipmaps = true } = {}) {
+function texture(el, { repeat = false } = {}) {
   const tex = new THREE.CanvasTexture(el)
-  tex.colorSpace = THREE.NoColorSpace
-  tex.generateMipmaps = mipmaps
-  tex.minFilter = mipmaps ? THREE.LinearMipmapLinearFilter : THREE.LinearFilter
   tex.anisotropy = 4
   if (repeat) tex.wrapS = tex.wrapT = THREE.RepeatWrapping
   return tex
@@ -58,17 +50,17 @@ function fit(ctx, lines, font, maxWidth, maxHeight, lineHeight, tracking) {
  *
  * 着色器分别采样两个通道, 源码层带抖动, 形成渲染与源码叠印的效果
  */
-export function headlineTexture({ lines, source, aspect = 2, fill = 0.86, align = 'center' }) {
+export function headlineTexture({ lines, source, aspect }) {
   const width = 2048
   const height = Math.round(width / aspect)
   const [el, ctx] = canvas(width, height)
+  const fill = 0.86
   const lineHeight = 0.92
   const heading = (size) => `800 ${size}px ${SANS}`
   const size = fit(ctx, lines, heading, width * fill, height * fill, lineHeight, -0.055)
   const blockHeight = size * lineHeight * lines.length
-  const x = align === 'center' ? width / 2 : width * (1 - fill) * 0.5
-  ctx.textAlign = align === 'center' ? 'center' : 'left'
-  ctx.textBaseline = 'alphabetic'
+  const x = width / 2
+  ctx.textAlign = 'center'
   ctx.fillStyle = 'rgb(255 0 0)'
   lines.forEach((line, i) => {
     const baseline = (height - blockHeight) / 2 + size * lineHeight * (i + 0.8)

@@ -29,7 +29,6 @@
   },
   "build": {
     "appId": "dev.oculis.app",
-    "productName": "Oculis",
     "files": [
       "src/**/*",
       "package.json"
@@ -56,7 +55,6 @@
           ]
         }
       ],
-      "icon": "build/icon.ico",
       "artifactName": "${productName}-${version}-win-${arch}-setup.${ext}"
     },
     "mac": {
@@ -69,20 +67,12 @@
           ]
         }
       ],
-      "icon": "build/icon.icns",
       "identity": "-",
       "hardenedRuntime": false,
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
     },
     "dmg": {
       "writeUpdateInfo": false
-    },
-    "linux": {
-      "target": "AppImage",
-      "icon": "build/icon.png"
-    },
-    "directories": {
-      "buildResources": "build"
     },
     "nsis": {
       "buildUniversalInstaller": false
@@ -91,7 +81,6 @@
       "provider": "github",
       "owner": "rainzee",
       "repo": "oculis",
-      "releaseType": "draft",
       "vPrefixedTagName": false
     }
   }

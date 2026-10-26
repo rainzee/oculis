@@ -268,9 +268,9 @@ body.is-twirling .nav {
   outline-offset: 4px;
 }
 
-/* 舞台: 1500vh 的滚动长度, 画布固定并以 exclusion 混合到背景色上 */
+/* 舞台: 1880vh 的滚动长度, 画布固定并以 exclusion 混合到背景色上 */
 .stage {
-  height: 1500vh;
+  height: 1880vh;
   pointer-events: none;
   user-select: none;
 }

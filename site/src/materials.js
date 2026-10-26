@@ -197,6 +197,7 @@ export function eyeMaterial(sclera, colors) {
       uTime: { value: 0 },
       uScroll: { value: 0 },
       uFire: { value: 0 },
+      uTear: { value: 0 },
       uSclera: { value: sclera },
       uIris: { value: srgb(colors.iris) },
       uIrisLight: { value: srgb(colors.irisLight) },
@@ -211,7 +212,7 @@ export function eyeMaterial(sclera, colors) {
       }
     `,
     fragmentShader: /* glsl */ `
-      uniform float uOpen, uTime, uScroll, uFire;
+      uniform float uOpen, uTime, uScroll, uFire, uTear;
       uniform vec2 uGaze;
       uniform sampler2D uSclera;
       uniform vec3 uIris, uIrisLight, uInk, uSnow;
@@ -246,6 +247,8 @@ export function eyeMaterial(sclera, colors) {
         // 巩膜, 反射着滚动的 Markdown 源码
         vec2 sp = (q - 32.0) / 24.0;
         vec2 suv = sp * (1.0 - 0.22 * dot(sp, sp)) * 0.5 + 0.5;
+        // 哭的时候巩膜里的倒影隔着泪水晃动
+        suv += vec2(sin(q.y * 0.5 + uTime * 2.0), cos(q.x * 0.4 + uTime * 1.7)) * 0.012 * uTear;
         suv.y += uScroll * 0.06 + uTime * 0.01;
         float text = texture2D(uSclera, suv).r;
         vec3 sclera = uSnow * (0.78 - 0.16 * text);
@@ -263,6 +266,15 @@ export function eyeMaterial(sclera, colors) {
         vec3 color = mix(sclera, iris, irisMask);
         float glint = 1.0 - smoothstep(0.7, 1.3, length(q - c - vec2(-2.6, -2.8)));
         color = mix(color, vec3(1.0), glint * 0.9 * irisMask);
+
+        // 下眼睑积起的泪水, 带一道流动的高光
+        float pool = uTear * (1.0 - smoothstep(0.0, 2.0 + 4.0 * uTear, dl)) * step(28.0, q.y) * inside;
+        float shimmer = 0.5 + 0.5 * sin(q.x * 0.9 - uTime * 2.5);
+        color = mix(color, vec3(0.7, 0.82, 1.0), pool * 0.55);
+        color += vec3(0.25, 0.3, 0.4) * pool * shimmer * (1.0 - smoothstep(0.0, 1.5, abs(dl - 1.2 - 2.0 * uTear)));
+        // 哭红的眼白
+        float red = uTear * smoothstep(10.0, 24.0, length(q - 32.0)) * (1.0 - irisMask) * inside;
+        color = mix(color, color * vec3(1.0, 0.72, 0.72), red * 0.6);
 
         color = mix(color, uSnow * 1.15, stroke);
         float alpha = max(inside, stroke);

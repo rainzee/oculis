@@ -12,7 +12,6 @@ export const INK = '#0d1117'
 export const SNOW = '#f0f6fc'
 
 export const EYE_OPEN = 'M8 32 C20 16 44 16 56 32 C44 48 20 48 8 32 Z'
-export const EYE_CLOSED = 'M8 32 C20 48 44 48 56 32 C44 48 20 48 8 32 Z'
 export const LID_CLOSED = 'M8 32 C20 48 44 48 56 32'
 
 // 字标, 单线几何, 线宽 5, x 高 24, 升部 36, 基线 y 36
@@ -28,10 +27,10 @@ export const WORD = `
     <circle cx="96.5" cy="4.5" r="3" fill="currentColor" />`
 
 /** 线条标志, 墨色眼睑, 品牌色瞳孔 */
-export function markSvg({ color = INK, pupil = IRIS } = {}) {
+export function markSvg() {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
-  <path d="${EYE_OPEN}" fill="none" stroke="${color}" stroke-width="4" stroke-linejoin="miter" />
-  <circle cx="32" cy="32" r="8" fill="${pupil}" />
+  <path d="${EYE_OPEN}" fill="none" stroke="${INK}" stroke-width="4" />
+  <circle cx="32" cy="32" r="8" fill="${IRIS}" />
 </svg>
 `
 }
@@ -41,10 +40,10 @@ export function markSvg({ color = INK, pupil = IRIS } = {}) {
  *
  * 眼睛按线宽 5 放大 1.25 倍, 字标右移 76.2
  */
-export function logoSvg({ color = INK, pupil = IRIS } = {}) {
+export function logoSvg({ color, pupil }) {
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 195 36" width="390" height="72" color="${color}">
   <title>Oculis</title>
-  <path d="M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="miter" />
+  <path d="M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" fill="none" stroke="currentColor" stroke-width="5" />
   <circle cx="33.1" cy="18.5" r="10" fill="${pupil}" />
   <g transform="translate(76.2 0)">${WORD}
   </g>
@@ -57,17 +56,17 @@ export function logoSvg({ color = INK, pupil = IRIS } = {}) {
  *
  * inset 为 macOS 规范的留白, 1024 画布内图块为 824
  */
-export function iconSvg({ size = 1024, inset = false } = {}) {
+export function iconSvg({ inset = false } = {}) {
   const tile = inset ? 824 : 1024
   const offset = (1024 - tile) / 2
   const radius = tile * 0.2246
   const markSize = tile * 0.738
   const markOffset = offset + (tile - markSize) / 2
   const scale = markSize / 64
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="${size}" height="${size}">
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
   <rect x="${offset}" y="${offset}" width="${tile}" height="${tile}" rx="${radius}" fill="${IRIS}" />
   <g transform="translate(${markOffset} ${markOffset}) scale(${scale})">
-    <path d="${EYE_OPEN}" fill="#fff" stroke="#fff" stroke-width="4" stroke-linejoin="miter" />
+    <path d="${EYE_OPEN}" fill="#fff" stroke="#fff" stroke-width="4" />
     <circle cx="32" cy="32" r="8" fill="${IRIS}" />
   </g>
 </svg>

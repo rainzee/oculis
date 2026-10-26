@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 195 36" width="390" height="72" color="#f0f6fc">
   <title>Oculis</title>
-  <path d="M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" fill="none" stroke="currentColor" stroke-width="5" stroke-linejoin="miter" />
+  <path d="M3.1 18.5 C18.1 -1.5 48.1 -1.5 63.1 18.5 C48.1 38.5 18.1 38.5 3.1 18.5 Z" fill="none" stroke="currentColor" stroke-width="5" />
   <circle cx="33.1" cy="18.5" r="10" fill="#7d8cff" />
   <g transform="translate(76.2 0)">
     <g fill="none" stroke="currentColor" stroke-width="5">

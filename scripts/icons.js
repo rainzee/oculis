@@ -2,7 +2,7 @@
 // 用法: bun run icons
 
 import { Resvg } from '@resvg/resvg-js'
-import { mkdir, writeFile } from 'node:fs/promises'
+import { writeFile } from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { INK, IRIS, IRIS_LIGHT, SNOW, iconSvg, logoSvg, markSvg } from './brand.js'
@@ -50,41 +50,33 @@ function icns(entries) {
   return Buffer.concat([head, ...chunks])
 }
 
-async function main() {
-  await mkdir(assets, { recursive: true })
-  await mkdir(build, { recursive: true })
+// Windows 与 Linux 使用满版图块, macOS 使用带留白的图块
+const full = iconSvg()
+const inset = iconSvg({ inset: true })
+const render = (svg, sizes) => Object.fromEntries(sizes.map((size) => [size, rasterize(svg, size)]))
 
-  await writeFile(path.join(assets, 'mark.svg'), markSvg())
-  await writeFile(path.join(assets, 'logo-light.svg'), logoSvg({ color: INK, pupil: IRIS }))
-  await writeFile(path.join(assets, 'logo-dark.svg'), logoSvg({ color: SNOW, pupil: IRIS_LIGHT }))
-  await writeFile(path.join(assets, 'icon.svg'), iconSvg())
+const win = render(full, [16, 24, 32, 48, 64, 128, 256, 1024])
+const mac = render(inset, [16, 32, 64, 128, 256, 512, 1024])
 
-  // Windows 与 Linux 使用满版图块, macOS 使用带留白的图块
-  const full = iconSvg()
-  const inset = iconSvg({ inset: true })
-  const render = (svg, sizes) => Object.fromEntries(sizes.map((size) => [size, rasterize(svg, size)]))
-
-  const win = render(full, [16, 24, 32, 48, 64, 128, 256, 1024])
-  const mac = render(inset, [16, 32, 64, 128, 256, 512, 1024])
-
-  await writeFile(path.join(build, 'icon.png'), win[1024])
-  await writeFile(path.join(build, 'icon.ico'), ico([16, 24, 32, 48, 64, 128, 256].map((size) => ({ size, data: win[size] }))))
-  await writeFile(
-    path.join(build, 'icon.icns'),
-    icns([
-      { type: 'icp4', data: mac[16] },
-      { type: 'icp5', data: mac[32] },
-      { type: 'ic11', data: mac[32] },
-      { type: 'ic12', data: mac[64] },
-      { type: 'ic07', data: mac[128] },
-      { type: 'ic13', data: mac[256] },
-      { type: 'ic08', data: mac[256] },
-      { type: 'ic14', data: mac[512] },
-      { type: 'ic09', data: mac[512] },
-      { type: 'ic10', data: mac[1024] },
-    ]),
-  )
-  console.log('icons written to assets/ and build/')
-}
-
-await main()
+await writeFile(path.join(assets, 'mark.svg'), markSvg())
+await writeFile(path.join(assets, 'logo-light.svg'), logoSvg({ color: INK, pupil: IRIS }))
+await writeFile(path.join(assets, 'logo-dark.svg'), logoSvg({ color: SNOW, pupil: IRIS_LIGHT }))
+await writeFile(path.join(assets, 'icon.svg'), full)
+await writeFile(path.join(build, 'icon.png'), win[1024])
+await writeFile(path.join(build, 'icon.ico'), ico([16, 24, 32, 48, 64, 128, 256].map((size) => ({ size, data: win[size] }))))
+await writeFile(
+  path.join(build, 'icon.icns'),
+  icns([
+    { type: 'icp4', data: mac[16] },
+    { type: 'icp5', data: mac[32] },
+    { type: 'ic11', data: mac[32] },
+    { type: 'ic12', data: mac[64] },
+    { type: 'ic07', data: mac[128] },
+    { type: 'ic13', data: mac[256] },
+    { type: 'ic08', data: mac[256] },
+    { type: 'ic14', data: mac[512] },
+    { type: 'ic09', data: mac[512] },
+    { type: 'ic10', data: mac[1024] },
+  ]),
+)
+console.log('icons written to assets/ and build/')

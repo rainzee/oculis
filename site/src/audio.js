@@ -26,7 +26,7 @@ function impulse(ctx, seconds, decay = 2.4) {
   return buffer
 }
 
-/** 创建页面音频, 必须在用户手势中调用 start */
+/** 创建页面音频, 必须在用户手势中调用一次 start, 除 speed 与 setMuted 外的方法只在 start 之后调用 */
 export function createAudio() {
   let ctx = null
   let master = null
@@ -36,8 +36,6 @@ export function createAudio() {
   let muted = false
 
   function start() {
-    const AudioContext = window.AudioContext ?? window.webkitAudioContext
-    if (ctx || !AudioContext) return
     ctx = new AudioContext()
     master = ctx.createGain()
     master.gain.value = muted ? 0 : 0.8
@@ -99,7 +97,6 @@ export function createAudio() {
 
   /** 滚动速度映射为噪声音量 */
   function scroll(delta) {
-    if (!scrub) return
     scrub.gain.cancelScheduledValues(ctx.currentTime)
     scrub.gain.setTargetAtTime(Math.min(0.09, Math.abs(delta) * 1.4), ctx.currentTime, 0.03)
     scrub.gain.setTargetAtTime(0, ctx.currentTime + 0.12, 0.12)
@@ -107,7 +104,6 @@ export function createAudio() {
 
   /** 眼睛撞墙时的失真弹响 */
   function boing() {
-    if (!ctx) return
     const now = ctx.currentTime
     const saw = ctx.createOscillator()
     const ring = ctx.createOscillator()
@@ -144,9 +140,78 @@ export function createAudio() {
     ring.stop(now + 0.2)
   }
 
+  /** 金鱼受惊或字母被拨动时的气泡音, pitch 为音高倍率 */
+  function bloop(pitch = 1) {
+    if (!ctx) return
+    const now = ctx.currentTime
+    const osc = ctx.createOscillator()
+    const env = ctx.createGain()
+    osc.type = 'sine'
+    osc.frequency.setValueAtTime(260 * pitch, now)
+    osc.frequency.exponentialRampToValueAtTime(900 * pitch, now + 0.09)
+    env.gain.setValueAtTime(0, now)
+    env.gain.linearRampToValueAtTime(0.12, now + 0.01)
+    env.gain.exponentialRampToValueAtTime(0.0005, now + 0.16)
+    osc.connect(env)
+    env.connect(master)
+    env.connect(reverb)
+    osc.start(now)
+    osc.stop(now + 0.2)
+  }
+
+  /** 手提箱锁扣弹开的咔哒声, 一小段带通噪声 */
+  function latch() {
+    if (!ctx) return
+    const now = ctx.currentTime
+    const length = Math.floor(ctx.sampleRate * 0.05)
+    const buffer = ctx.createBuffer(1, length, ctx.sampleRate)
+    const data = buffer.getChannelData(0)
+    for (let i = 0; i < length; i++) data[i] = (Math.random() * 2 - 1) * (1 - i / length) ** 4
+    const src = ctx.createBufferSource()
+    const filter = ctx.createBiquadFilter()
+    const out = ctx.createGain()
+    src.buffer = buffer
+    filter.type = 'bandpass'
+    filter.frequency.value = 2400 + Math.random() * 800
+    filter.Q.value = 3
+    out.gain.value = 0.5
+    src.connect(filter)
+    filter.connect(out)
+    out.connect(master)
+    out.connect(reverb)
+    src.start(now)
+  }
+
+  /** 箱子里金光涌出时缓缓升起的和声, 带轻微颤音 */
+  function glow() {
+    if (!ctx) return
+    const now = ctx.currentTime
+    for (const [i, f] of [220, 277.18, 329.63, 440, 554.37].entries()) {
+      const osc = ctx.createOscillator()
+      const vibrato = ctx.createOscillator()
+      const depth = ctx.createGain()
+      const env = ctx.createGain()
+      osc.type = i % 2 ? 'triangle' : 'sine'
+      osc.frequency.value = f
+      vibrato.frequency.value = 4.5 + i * 0.3
+      depth.gain.value = f * 0.006
+      vibrato.connect(depth)
+      depth.connect(osc.frequency)
+      env.gain.setValueAtTime(0, now)
+      env.gain.linearRampToValueAtTime(0.035, now + 1.2 + i * 0.15)
+      env.gain.exponentialRampToValueAtTime(0.0005, now + 5.5)
+      osc.connect(env)
+      env.connect(master)
+      env.connect(reverb)
+      osc.start(now)
+      vibrato.start(now)
+      osc.stop(now + 5.6)
+      vibrato.stop(now + 5.6)
+    }
+  }
+
   /** 章节切换时的短音 */
   function chime(index) {
-    if (!ctx) return
     const now = ctx.currentTime
     const f = CHIMES[index % CHIMES.length]
     for (const [type, mult, level] of [
@@ -170,7 +235,6 @@ export function createAudio() {
 
   /** 字标成形时的和弦 */
   function chord() {
-    if (!ctx) return
     const now = ctx.currentTime
     CHORD.forEach((f, i) => {
       const osc = ctx.createOscillator()
@@ -197,6 +261,9 @@ export function createAudio() {
     speed,
     scroll,
     boing,
+    bloop,
+    latch,
+    glow,
     chime,
     chord,
     setMuted,
