@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@pierre/highlights": "^0.2.0",
+    "electron-updater": "^6.8.11",
     "github-markdown-css": "^5.9.0",
     "marked": "^18.1.1",
     "marked-alert": "^2.1.2",
@@ -46,12 +47,32 @@
       }
     ],
     "win": {
-      "target": "nsis",
-      "icon": "build/icon.ico"
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64",
+            "arm64"
+          ]
+        }
+      ],
+      "icon": "build/icon.ico",
+      "artifactName": "${productName}-${version}-win-${arch}-setup.${ext}"
     },
     "mac": {
-      "target": "dmg",
-      "icon": "build/icon.icns"
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.icns",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
     },
     "linux": {
       "target": "AppImage",
@@ -59,6 +80,16 @@
     },
     "directories": {
       "buildResources": "build"
+    },
+    "nsis": {
+      "buildUniversalInstaller": false
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "rainzee",
+      "repo": "oculis",
+      "releaseType": "draft",
+      "vPrefixedTagName": false
     }
   }
 }

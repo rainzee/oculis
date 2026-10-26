@@ -5,6 +5,7 @@ import path from 'node:path'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import { renderMarkdown } from './render.js'
 import { createFindBar } from './find-bar.js'
+import electronUpdater from 'electron-updater'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const MD_EXT = /\.(md|markdown|mdown|mkd|mkdn|mdx|txt)$/i
@@ -187,6 +188,8 @@ if (!app.requestSingleInstanceLock()) {
   app.whenReady().then(() => {
     buildMenu()
     createWindow()
+    // macOS 只有 ad-hoc 签名, 无法通过更新时的签名校验, 自动更新仅在 Windows 启用
+    if (process.platform === 'win32') electronUpdater.autoUpdater.checkForUpdates().catch(() => {})
     app.on('activate', () => BrowserWindow.getAllWindows().length === 0 && createWindow())
   })
 
