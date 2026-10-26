@@ -13,14 +13,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Check tag matches package.json
         run: test "$GITHUB_REF_NAME" = "$(jq -r .version package.json)"
+      # 说明按 .github/release-notes.md 起草, 发布前在草稿里补上正文
       - name: Create draft release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 ||
-            gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "$GITHUB_REF_NAME" --generate-notes
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 && exit 0
+          previous=$(git describe --tags --abbrev=0 "$GITHUB_REF_NAME^")
+          sed -e "s/{{VERSION}}/$GITHUB_REF_NAME/g" -e "s/{{PREVIOUS}}/$previous/g" .github/release-notes.md > notes.md
+          gh release create "$GITHUB_REF_NAME" --draft --verify-tag --title "$GITHUB_REF_NAME" --notes-file notes.md
 
   publish:
     needs: draft

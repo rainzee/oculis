@@ -74,6 +74,9 @@
       "hardenedRuntime": false,
       "artifactName": "${productName}-${version}-mac-${arch}.${ext}"
     },
+    "dmg": {
+      "writeUpdateInfo": false
+    },
     "linux": {
       "target": "AppImage",
       "icon": "build/icon.png"
