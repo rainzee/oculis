@@ -14,6 +14,11 @@
 
 No editing. No formatting. No saving. Oculis opens Markdown and renders it the way GitHub does.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="assets/screenshot-dark.png" />
+  <img src="assets/screenshot-light.png" alt="The Oculis window showing a README with an alert, highlighted code and a Mermaid diagram" />
+</picture>
+
 ## What it does
 
 - GitHub Flavored Markdown, alerts, footnotes, heading anchors
