@@ -8,6 +8,10 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js'
 import { IRIS, IRIS_LIGHT, INK, SNOW } from '../../scripts/brand.js'
 import { headlineTexture, stripTexture, tileTexture, scleraTexture, glyphTextures } from './textures.js'
 import { headlineMaterial, stripMaterial, tileMaterial, eyeMaterial } from './materials.js'
+import { createGoldfish, createBubbles } from './goldfish.js'
+import { createWordmark, WORD_WIDTH } from './wordmark.js'
+import { createBriefcase } from './briefcase.js'
+import { createTears } from './tears.js'
 
 const CAMERA_Z = 6
 const FOV = 50
@@ -68,6 +72,16 @@ const COPY = {
 const CHIMES = [1.15, 2.2, 7, 7.5]
 const CHORD_AT = 10.4
 
+// 手提箱与金鱼两个章节插在第三章碎裂之后, 期间其余章节的进度停住
+const INSERT_AT = 5.6
+const CASE_AT = INSERT_AT
+const CASE_SPAN = 2
+const FISH_AT = CASE_AT + CASE_SPAN
+const FISH_SPAN = 1.8
+const INSERTED = CASE_SPAN + FISH_SPAN
+/** 把滚动进度换算成去掉插入章节后的叙事进度 */
+const story = (p) => (p < INSERT_AT ? p : Math.max(INSERT_AT, p - INSERTED))
+
 const clamp = (x, a, b) => Math.min(b, Math.max(a, x))
 const smooth = (a, b, x) => {
   const t = clamp((x - a) / (b - a), 0, 1)
@@ -95,7 +109,8 @@ export async function createScene({ container, audio, onLoop }) {
   const camera = new THREE.PerspectiveCamera(FOV, innerWidth / innerHeight, 0.1, 400)
   camera.position.z = CAMERA_Z
   const pmrem = new THREE.PMREMGenerator(renderer)
-  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+  const envMap = pmrem.fromScene(new RoomEnvironment(), 0.04).texture
+  scene.environment = envMap
   scene.environmentIntensity = 0.35
 
   // 后期: 辉光, 胶片颗粒, 残影; 残影衰减在进入后逐渐变短
@@ -137,6 +152,22 @@ export async function createScene({ container, audio, onLoop }) {
   )
   eye.renderOrder = 10
   scene.add(eye)
+
+  // 背景里游动的金鱼, 以及第三章碎裂之后飞入的立体字标
+  const fish = createGoldfish({ envMap })
+  fish.root.visible = false
+  scene.add(fish.root)
+  const bubbles = createBubbles({ scene })
+  const briefcase = createBriefcase({ scene, envMap })
+  const box = { u: 0, presence: 0, spin: 0, angle: 0 }
+  const tears = createTears({ scene, envMap })
+  const fishLights = [new THREE.DirectionalLight(0xfff1dd, 0), new THREE.DirectionalLight(0x5b6cff, 0)]
+  fishLights[0].position.set(2, 4, 5)
+  fishLights[1].position.set(-3, 2, -5)
+  scene.add(...fishLights)
+  const swim = { u: 0, nextBubble: 0, flick: 0, presence: 0, solid: 0, quat: new THREE.Quaternion() }
+  const word = createWordmark({ scene, envMap, iris: IRIS, snow: SNOW })
+  let hovered = -1
 
   const glyphs = glyphTextures().map((glyph) => {
     const aspect = glyph.size[0] / glyph.size[1]
@@ -276,6 +307,13 @@ export async function createScene({ container, audio, onLoop }) {
     gaze: new THREE.Vector2(),
     blinkAt: -10,
     nextBlink: 3,
+    tear: 0,
+    ouchUntil: 0,
+    shakeUntil: 0,
+    nextTear: 0,
+    side: 0,
+    lastX: 0,
+    lastY: 0,
   }
   let drag = null
   let trail = 0.96
@@ -293,8 +331,15 @@ export async function createScene({ container, audio, onLoop }) {
       state.ignoreScroll = false
       return
     }
-    for (const at of CHIMES) if (dp > 0 && p >= at && p - dp < at) audio.chime(CHIMES.indexOf(at))
-    if (dp > 0 && p >= CHORD_AT && p - dp < CHORD_AT) audio.chord()
+    const s = story(p)
+    const before = story(p - dp)
+    for (const at of CHIMES) if (dp > 0 && s >= at && before < at) audio.chime(CHIMES.indexOf(at))
+    if (dp > 0 && s >= CHORD_AT && before < CHORD_AT) audio.chord()
+    const crossed = (at) => dp > 0 && p >= at && p - dp < at
+    if (crossed(FISH_AT + 0.15)) audio.bloop(0.5)
+    if (crossed(CASE_AT + CASE_SPAN * 0.15)) audio.latch()
+    if (crossed(CASE_AT + CASE_SPAN * 0.19)) audio.latch()
+    if (crossed(CASE_AT + CASE_SPAN * 0.22)) audio.glow()
     audio.scroll(dp)
     // 滚动给眼睛加速, 横向方向在撞墙时翻转, 让持续滚动始终推着它走
     const k = view.w / 8
@@ -306,15 +351,33 @@ export async function createScene({ container, audio, onLoop }) {
   const ndc = new THREE.Vector2()
   const cursorWorld = () => [state.mouse.x * view.w, -state.mouse.y * view.h]
 
-  function hitEye(clientX, clientY) {
+  function pick(clientX, clientY, object) {
     ndc.set((clientX / innerWidth) * 2 - 1, -(clientY / innerHeight) * 2 + 1)
     raycaster.setFromCamera(ndc, camera)
-    const hit = raycaster.intersectObject(eye)[0]
+    return raycaster.intersectObject(object, true)[0]
+  }
+
+  /** 拨动光标下的字母, 返回字母序号, 没有则为 -1 */
+  function kickLetter(clientX, clientY, strength) {
+    if (!word.group.visible) return -1
+    const hit = pick(clientX, clientY, word.group)
+    const index = hit ? hit.object.userData.letter : -1
+    if (index >= 0 && (index !== hovered || strength > 1)) {
+      const letter = word.letters[index]
+      letter.userData.spin += (Math.sign(state.mouse.x - letter.userData.home.x / WORD_WIDTH) || 1) * 0.25 * strength
+      letter.userData.hop = 1
+      audio.bloop(0.7 + index * 0.12)
+    }
+    return index
+  }
+
+  function hitEye(clientX, clientY) {
+    const hit = pick(clientX, clientY, eye)
     if (!hit) return false
     return Math.abs(hit.uv.x - 0.5) < 0.38 && Math.abs(hit.uv.y - 0.5) < 0.2
   }
 
-  const free = () => state.entered && !state.zoom && state.p < 10.2
+  const free = () => state.entered && !state.zoom && story(state.p) < 10.2
 
   function onPointerMove(e) {
     state.mouse.x = e.clientX / innerWidth - 0.5
@@ -331,10 +394,25 @@ export async function createScene({ container, audio, onLoop }) {
       document.body.style.cursor = 'grabbing'
       return
     }
-    if (state.entered) document.body.style.cursor = hitEye(e.clientX, e.clientY) ? 'grab' : ''
+    if (!state.entered) return
+    hovered = kickLetter(e.clientX, e.clientY, 1)
+    document.body.style.cursor = hitEye(e.clientX, e.clientY) ? 'grab' : hovered >= 0 ? 'pointer' : ''
   }
 
   function onPointerDown(e) {
+    if (!state.entered || e.target.closest('a, button')) return
+    if (kickLetter(e.clientX, e.clientY, 3) >= 0) return
+    if (briefcase.paper.visible && pick(e.clientX, e.clientY, briefcase.paper)) {
+      box.spin += Math.PI * 2
+      audio.bloop(1.1)
+      return
+    }
+    if (fish.root.visible && pick(e.clientX, e.clientY, fish.root)) {
+      swim.flick = 1
+      bubbles.emit(fish.mouth(), 14, fish.root.scale.x * 0.3)
+      audio.bloop(0.6 + Math.random() * 0.3)
+      return
+    }
     if (!free() || !hitEye(e.clientX, e.clientY)) return
     const [cx, cy] = cursorWorld()
     drag = { ox: body.x - cx, oy: body.y - cy, sx: e.clientX, sy: e.clientY, moved: false }
@@ -358,9 +436,9 @@ export async function createScene({ container, audio, onLoop }) {
   function zoom(on) {
     state.zoom = on
     body.blinkAt = time
-    if (!on && state.p > 11) {
+    if (!on && story(state.p) > 11) {
       state.ignoreScroll = true
-      window.scrollTo(0, innerHeight * 10.6)
+      window.scrollTo(0, innerHeight * (10.6 + INSERTED))
     }
   }
 
@@ -578,11 +656,13 @@ export async function createScene({ container, audio, onLoop }) {
         body.dir *= -1
         audio.boing()
         blink()
+        body.ouchUntil = time + 1.4
       } else if (Math.abs(body.y) > by) {
         body.y = Math.sign(body.y) * by
         body.vy *= -1
         audio.boing()
         blink()
+        body.ouchUntil = time + 1.4
       }
     }
 
@@ -600,6 +680,211 @@ export async function createScene({ container, audio, onLoop }) {
     eye.rotation.x = ease(eye.rotation.x, still ? 0 : clamp(state.mouse.y * 0.7 + body.vy * 4, -0.5, 0.5), 0.1, f)
 
     audio.speed((Math.abs(body.vx) + Math.abs(body.vy)) / (view.w * 0.018))
+    updateTears(p, f)
+  }
+
+  const corner = new THREE.Vector3()
+  const follow = new THREE.Vector3()
+  /** 眼睛局部 64 网格坐标转世界坐标 */
+  const eyePoint = (qx, qy) => eye.localToWorld(corner.set(qx / 64 - 0.5, 0.5 - qy / 64, 0.02))
+
+  // 眼泪: 读到想读的东西时喜极而泣, 讲到编辑器时难过, 撞墙会疼, 拖着猛甩会甩出泪花
+  function updateTears(p, f) {
+    const dt = f / 60
+    follow.set(body.x - body.lastX, body.y - body.lastY, 0)
+    body.lastX = body.x
+    body.lastY = body.y
+    const ct = clamp((state.p - CASE_AT) / CASE_SPAN, 0, 1)
+    const awake = state.entered && p < 10.2 && !state.zoom
+    let target = 0
+    if (awake) {
+      if (p > 2.4 && p < 4.6) target = 0.75
+      if (ct > 0.42 && ct < 0.86) target = 1
+      if (time < body.ouchUntil) target = Math.max(target, 0.7)
+      if (time < body.shakeUntil) target = 1
+    }
+    body.tear = ease(body.tear, target, target > body.tear ? 0.03 : 0.015, f)
+    eye.material.uniforms.uTear.value = body.tear
+
+    // 拖着甩: 速度够快时从眼睑四周甩出泪花
+    const fling = Math.hypot(follow.x, follow.y)
+    if (drag && fling > view.w * 0.03) {
+      body.shakeUntil = time + 1.2
+      if (body.tear > 0.3) {
+        const a = Math.random() * Math.PI * 2
+        const at = eyePoint(32 + Math.cos(a) * 22, 32 + Math.sin(a) * 10)
+        tears.emit(at, body.size * 0.03, follow.x * 0.5 + Math.cos(a) * 0.02, follow.y * 0.5 + 0.02, 0)
+      }
+    }
+
+    if (awake && body.tear > 0.45 && time > body.nextTear) {
+      body.side ^= 1
+      const at = Math.random() < 0.2 ? eyePoint(32 + (Math.random() - 0.5) * 16, 43.5) : eyePoint(body.side ? 50 : 14, 38)
+      tears.emit(at, body.size * (0.022 + Math.random() * 0.016), 0, 0, 0.35 + Math.random() * 0.5)
+      body.nextTear = time + (0.9 - 0.55 * body.tear) * (0.6 + Math.random() * 0.8)
+    }
+    tears.update({ f, dt, floor: -heightAt(0) / 2 - 0.3, follow })
+  }
+
+  // 立体字标: 从深处旋转飞入, 随滚动摆动, 光标拨动会转圈, 离开时四散飞向镜头
+  function updateWord(p, T, f) {
+    const on = state.entered && p > INSERT_AT && p < 7.1
+    word.group.visible = on
+    if (!on) {
+      for (const letter of word.letters) letter.position.set(0, 0, -400)
+      return
+    }
+    const k = (widthAt(0.4) * (view.narrow ? 0.86 : 0.6)) / WORD_WIDTH
+    word.group.scale.setScalar(k)
+    word.group.position.set(0, view.narrow ? 0 : -0.02 * view.h, 0.4)
+    word.group.rotation.y = ease(word.group.rotation.y, state.mouse.x * 0.5, 0.05, f)
+    word.group.rotation.x = ease(word.group.rotation.x, state.mouse.y * 0.4, 0.05, f)
+    const leave = smooth(6.55, 7.05, p)
+    word.letters.forEach((letter, i) => {
+      const d = letter.userData
+      const arrive = smooth(INSERT_AT + i * 0.06, INSERT_AT + 0.45 + i * 0.06, p)
+      const side = i - 2.5
+      d.hop = (d.hop ?? 0) * 0.93 ** f
+      const x = d.home.x * (1 + leave * 1.6) + side * leave * 30
+      const y = d.home.y + Math.sin(T * 1.6 + i * 0.8) * 1.4 + Math.sin(d.hop * Math.PI) * 9 + leave * (i % 2 ? 40 : -40)
+      const z = (1 - arrive) * -420 + leave * (90 + i * 12)
+      letter.position.x = ease(letter.position.x, x, 0.2, f)
+      letter.position.y = ease(letter.position.y, y, 0.25, f)
+      letter.position.z = ease(letter.position.z, z, 0.15, f)
+      d.angle += d.spin * f
+      d.spin *= 0.96 ** f
+      // 转速降下来后回正到整圈
+      d.angle = ease(d.angle, Math.round(d.angle / (Math.PI * 2)) * Math.PI * 2, Math.abs(d.spin) < 0.02 ? 0.06 : 0, f)
+      letter.rotation.y = (1 - arrive) * Math.PI * 3 * (i % 2 ? 1 : -1) + d.angle + Math.sin(p * 6 + i * 0.9) * 0.3
+      letter.rotation.x = Math.sin(T * 0.7 + i) * 0.15 + leave * (i % 2 ? 2 : -2)
+      letter.rotation.z = Math.sin(T * 0.9 + i * 1.7) * 0.06
+    })
+  }
+
+  const paperFrom = new THREE.Vector3()
+  const paperTo = new THREE.Vector3()
+
+  // 手提箱章节: 箱子落下, 锁扣弹开, 金光溢出, 里面唯一的东西是一份 README, 它升起来飞到眼前
+  function updateBriefcase(raw, T, f) {
+    const target = clamp((raw - CASE_AT) / CASE_SPAN, 0, 1)
+    box.presence = state.entered ? smooth(CASE_AT - 0.05, CASE_AT + 0.1, raw) * (1 - smooth(CASE_AT + CASE_SPAN - 0.15, CASE_AT + CASE_SPAN, raw)) : 0
+    const { root, paper } = briefcase
+    if (box.presence < 0.001) {
+      root.visible = paper.visible = false
+      box.u = target
+      return
+    }
+    if (!root.visible) box.u = target
+    root.visible = true
+    box.u = ease(box.u, target, 0.08, f)
+    const t = box.u
+
+    const s = (widthAt(-1) * (view.narrow ? 0.75 : 0.42)) / briefcase.size.w
+    const drop = smooth(0, 0.12, t)
+    const sink = smooth(0.86, 1, t)
+    root.scale.setScalar(s * (1 - 0.6 * sink))
+    root.position.set(
+      0,
+      -0.2 * view.h + (1 - drop) * view.h * 0.9 - sink * view.h * 0.5 + Math.sin(T * 0.8) * 0.03,
+      -1 - sink * 4,
+    )
+    root.rotation.x = ease(root.rotation.x, 0.55 + state.mouse.y * 0.25, 0.08, f)
+    root.rotation.y = ease(root.rotation.y, (1 - drop) * 1.6 + state.mouse.x * 0.35 + Math.sin(T * 0.3) * 0.06, 0.08, f)
+    root.rotation.z = (1 - drop) * 0.3
+
+    renderer.getDrawingBufferSize(buffer)
+    const flicker = 1 + Math.sin(T * 7) * 0.03 + Math.sin(T * 13.7) * 0.02
+    briefcase.update({
+      open: smooth(0.2, 0.42, t) * (1 - 0.7 * sink),
+      power: smooth(0.22, 0.4, t) * (1 - 0.6 * smooth(0.8, 1, t)) * flicker,
+      latch: smooth(0.14, 0.2, t),
+      time: T,
+      pixelScale: buffer.y / (2 * Math.tan((FOV * Math.PI) / 360)),
+    })
+
+    paper.visible = t > 0.36
+    if (!paper.visible) return
+    const rise = smooth(0.36, 0.62, t)
+    const near = smooth(0.8, 1, t)
+    root.updateMatrixWorld()
+    paperFrom.copy(briefcase.inside())
+    paperTo.set(0, 0.08 * view.h + Math.sin(T * 0.9) * 0.04, 0.6)
+    paper.position.lerpVectors(paperFrom, paperTo, rise)
+    paper.position.z += near * 2.6
+    const full = heightAt(0.6) * 0.64
+    paper.scale.setScalar((s * briefcase.size.d * 0.7) * (1 - rise) + full * rise)
+    box.angle = ease(box.angle, box.spin, 0.06, f)
+    paper.rotation.x = (-Math.PI / 2 + root.rotation.x) * (1 - rise) + state.mouse.y * 0.3 * rise
+    paper.rotation.y = (1 - rise) * Math.PI * 2 + state.mouse.x * 0.4 * rise + box.angle
+    paper.rotation.z = Math.sin(T * 0.6) * 0.03 * rise
+    paper.material.opacity = 1 - smooth(0.9, 1, t)
+  }
+
+  // 金鱼的游动路线, x 与 y 按视野宽高的比例给出, z 为世界坐标
+  const ROUTE = [
+    [0.75, 0.35, -40],
+    [0.5, 0.14, -11],
+    [0.42, -0.02, -2.6],
+    [0.02, 0.03, -1.2],
+    [-0.42, -0.04, -2.4],
+    [-0.6, 0.14, -9],
+    [0.1, 0.38, -48],
+  ]
+  const route = new THREE.CatmullRomCurve3(ROUTE.map(() => new THREE.Vector3()))
+  const heading = new THREE.Object3D()
+  const tangent = new THREE.Vector3()
+  const gaze = new THREE.Vector3()
+  const local = new THREE.Vector3()
+  const buffer = new THREE.Vector2()
+
+  // 金鱼章节: 从深处游来, 侧身横穿占满画面, 掉头游回深处; 眼睛盯着光标, 点它会甩尾吐泡
+  function updateFish(raw, T, f) {
+    renderer.getDrawingBufferSize(buffer)
+    bubbles.update({ f, time, pixelScale: buffer.y / (2 * Math.tan((FOV * Math.PI) / 360)) })
+
+    const t = clamp((raw - FISH_AT) / FISH_SPAN, 0, 1)
+    swim.presence = state.entered ? smooth(FISH_AT - 0.05, FISH_AT + 0.15, raw) * (1 - smooth(FISH_AT + FISH_SPAN - 0.2, FISH_AT + FISH_SPAN, raw)) : 0
+    const lit = Math.max(swim.presence, box.presence)
+    fishLights[0].intensity = 1.3 * lit
+    fishLights[1].intensity = 1.6 * lit
+    const on = swim.presence > 0.001
+    if (!on) {
+      fish.root.visible = false
+      swim.u = t
+      return
+    }
+    if (!fish.root.visible) swim.u = t
+    fish.root.visible = true
+
+    ROUTE.forEach(([x, y, z], i) => route.points[i].set(x * view.w, y * view.h, z))
+    const prev = swim.u
+    swim.u = ease(swim.u, t, 0.06, f)
+    const u = clamp(swim.u, 0.0001, 0.9999)
+    const pos = route.getPoint(u)
+    pos.x += Math.sin(T * 0.5) * 0.06 * view.w * (1 - Math.abs(u - 0.5))
+    pos.y += Math.sin(T * 0.7) * 0.04 * view.h
+    route.getTangent(u, tangent)
+    fish.root.position.copy(pos)
+    const size = Math.max(widthAt(-1) * 0.95, heightAt(-1) * 0.8) / 4.2
+    fish.root.scale.setScalar(size * smooth(0, 0.04, t) * (1 - smooth(0.97, 1, t)))
+
+    heading.position.copy(pos)
+    heading.lookAt(tangent.add(pos))
+    swim.quat.copy(fish.root.quaternion)
+    fish.root.quaternion.slerp(heading.quaternion, 1 - 0.92 ** f)
+    // 转弯时身体朝弯的方向弯
+    local.subVectors(tangent, pos).applyQuaternion(swim.quat.invert())
+    const turn = clamp(local.x * -0.5, -0.25, 0.25)
+
+    swim.flick *= 0.95 ** f
+    const speed = clamp(Math.abs(swim.u - prev) * 400, 0, 1) * 0.8 + 0.15 + swim.flick
+    gaze.set(state.mouse.x * widthAt(3), -state.mouse.y * heightAt(3), 3)
+    fish.animate({ f, speed, turn, gaze })
+
+    if (time > swim.nextBubble && t > 0.05 && t < 0.95) {
+      bubbles.emit(fish.mouth(), 1 + ((Math.random() * 3) | 0), size * 0.22)
+      swim.nextBubble = time + 0.5 + Math.random() * 1.2
+    }
   }
 
   function tick(now) {
@@ -609,19 +894,28 @@ export async function createScene({ container, audio, onLoop }) {
     time += dt
     frame++
     const f = dt * 60
-    const p = state.p
+    const raw = state.p
+    const p = story(raw)
     const T = time * 1.2
 
     // 残影衰减按时间而非帧数计算, 在任何刷新率下拖尾长度一致
     if (state.entered) trail = Math.max(0.8, trail - 0.024 * dt)
-    afterimage.uniforms.damp.value = trail ** f
+    // 金鱼与立体字标是大块实体, 出场时压低辉光与残影, 免得糊成一片光
+    const solid = Math.max(swim.presence, word.group.visible ? 1 : 0, box.presence * 0.4)
+    swim.solid = ease(swim.solid, solid, 0.08, f)
+    bloom.strength = 0.45 * (1 - 0.8 * swim.solid)
+    bloom.threshold = 0.8 + 0.15 * swim.solid
+    afterimage.uniforms.damp.value = (trail * (1 - 0.35 * swim.solid)) ** f
 
     if (state.entered && p > 11.9 && !state.zoom) zoom(true)
     const end = document.body.scrollHeight / innerHeight - 1.1
-    if (state.entered && p >= end) loop()
+    if (state.entered && raw >= end) loop()
 
     tiles.material.uniforms.uTime.value = T
     chapters(p, T, f)
+    updateWord(p, T, f)
+    updateBriefcase(raw, T, f)
+    updateFish(raw, T, f)
     updateEye(p, T, f)
 
     lights[0].position.x += Math.sin(T * 0.4) * 0.01 * f
@@ -637,7 +931,7 @@ export async function createScene({ container, audio, onLoop }) {
 
     // 色相与背景色随滚动漂移, 开头与结尾回到纯粹的品牌色
     if (frame % 3 === 0) {
-      const envelope = smooth(0.5, 1.5, p) * (1 - smooth(9.6, 10.3, p))
+      const envelope = smooth(0.5, 1.5, p) * (1 - smooth(9.6, 10.3, p)) * (1 - Math.max(swim.presence, box.presence))
       const t = Math.max(0, p - 0.5)
       const hue = Math.sin(t * 3) * 360 * envelope
       canvas.style.filter = `hue-rotate(${hue.toFixed(1)}deg)${state.stage >= 2 ? ' invert(1)' : ''}`
@@ -680,7 +974,7 @@ export async function createScene({ container, audio, onLoop }) {
 
   return {
     get progress() {
-      return state.p
+      return story(state.p)
     },
     get loops() {
       return state.loops
