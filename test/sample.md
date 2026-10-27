@@ -120,6 +120,10 @@ flowchart LR
     F[文件变更]
   end
   F --> C
+  classDef done fill:#1a7f37,stroke:#116329
+  classDef warn fill:#fff8c5,stroke:#d4a72c
+  class E done
+  class D warn
 ```
 
 ### 时序图

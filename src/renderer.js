@@ -5,6 +5,9 @@ const base = document.head.appendChild(document.createElement('base'))
 
 let diagrams = []
 
+// 类成员, ER 属性, 文件树这类代码标识符用等宽字体绘制
+const MONOSPACE_PARTS = ['members', 'attributes', 'files']
+
 /** 用 Pele 将 mermaid 代码块挂载为可缩放, 自适应宽度的 SVG 图表 */
 function mountDiagrams() {
   for (const d of diagrams) d.destroy()
@@ -13,7 +16,7 @@ function mountDiagrams() {
     const container = document.createElement('div')
     container.className = 'mermaid-diagram'
     pre.replaceWith(container)
-    diagrams.push(window.pele.mount(container, pre.textContent))
+    diagrams.push(window.pele.mount(container, pre.textContent, { monospace: MONOSPACE_PARTS }))
   }
 }
 
