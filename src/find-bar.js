@@ -14,10 +14,11 @@ const isFindNext = (input) => input.key === 'F3' || ((input.control || input.met
  * 页内查找栏
  *
  * 查找栏放在独立的 WebContentsView 里, 若与文档同页,
- * findInPage 会把输入框里的文字也算作匹配并抢走焦点
+ * findInPage 会把输入框里的文字也算作匹配并抢走焦点,
+ * 查找对象是当前标签页, 由 setPage 切换, getTop 给出标签栏下沿
  */
-export function createFindBar(win) {
-  const page = win.webContents
+export function createFindBar(win, getTop) {
+  let page = null
   let view = null
   let query = ''
   let requestId = 0
@@ -41,8 +42,9 @@ export function createFindBar(win) {
   }
 
   function layout() {
+    if (!view) return
     const { width } = win.getContentBounds()
-    view.setBounds({ x: width - WIDTH - RIGHT, y: 0, width: WIDTH, height: HEIGHT })
+    view.setBounds({ x: width - WIDTH - RIGHT, y: getTop(), width: WIDTH, height: HEIGHT })
   }
 
   function createView() {
@@ -66,14 +68,14 @@ export function createFindBar(win) {
     bar.ipc.on('step', (_e, forward) => step(forward))
     bar.ipc.on('close', close)
     bar.loadFile(path.join(here, 'find.html'))
-    win.contentView.addChildView(view)
-    win.on('resize', layout)
     // 窗口关闭不会销毁子视图的 webContents
     win.once('closed', () => bar.close())
   }
 
   function open() {
     if (!view) createView()
+    // 重复添加会把视图移到最上层, 盖过之后新建的标签页
+    win.contentView.addChildView(view)
     layout()
     view.setVisible(true)
     view.webContents.focus()
@@ -105,11 +107,23 @@ export function createFindBar(win) {
     e.preventDefault()
   }
 
-  page.on('before-input-event', onKey)
-  page.on('found-in-page', (_e, result) => {
-    if (result.requestId !== requestId || !result.finalUpdate) return
-    send('result', { active: result.activeMatchOrdinal, matches: result.matches })
-  })
+  /** 接管一个标签页的按键与查找结果 */
+  function attach(contents) {
+    contents.on('before-input-event', onKey)
+    contents.on('found-in-page', (_e, result) => {
+      if (contents !== page || result.requestId !== requestId || !result.finalUpdate) return
+      send('result', { active: result.activeMatchOrdinal, matches: result.matches })
+    })
+  }
 
-  return { open, refresh }
+  /** 切换查找对象, 查找栏开着时在新标签页上重新查找 */
+  function setPage(contents) {
+    if (contents === page) return
+    if (page && !page.isDestroyed()) page.stopFindInPage('keepSelection')
+    page = contents
+    requestId = 0
+    refresh()
+  }
+
+  return { open, refresh, attach, setPage, layout }
 }
