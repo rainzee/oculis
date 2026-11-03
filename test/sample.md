@@ -91,6 +91,17 @@ const greet = (user: User): string => `Hello, ${user.name}!`
 + const next = 2
 ```
 
+终端输出, 转义序列按终端配色渲染:
+
+```ansi
+[1m$ bun test[0m
+[32m✓[0m render [2m(12ms)[0m
+[31m✗[0m find [2m(3ms)[0m
+  [31mexpected [1m5[22m matches, got [1m4[0m
+[38;5;208mwarn[0m 1 snapshot obsolete
+[30;42m PASS [0m [4mtest/render.test.js[0m
+```
+
 ```
 没有指定语言的代码块
     保留缩进
