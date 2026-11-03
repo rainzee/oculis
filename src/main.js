@@ -10,6 +10,7 @@ import electronUpdater from 'electron-updater'
 const here = path.dirname(fileURLToPath(import.meta.url))
 const MD_EXT = /\.(md|markdown|mdown|mkd|mkdn|mdx|txt)$/i
 const STRIP_HEIGHT = 36
+const isMac = process.platform === 'darwin'
 
 let win = null
 let findBar = null
@@ -24,9 +25,14 @@ function findFileArgs(argv) {
   return args.filter((a) => !a.startsWith('-') && existsSync(a) && statSync(a).isFile())
 }
 
-// 只有一个标签页时不显示标签栏, 与单文档时的外观一致
-const stripHeight = () => (tabs.length > 1 ? STRIP_HEIGHT : 0)
 const backgroundColor = () => (nativeTheme.shouldUseDarkColors ? '#0d1117' : '#ffffff')
+
+/** Windows 与 Linux 的窗口按钮叠在标签栏右上角, 配色与 tabs.css 一致, 留出底边 */
+const titleBarOverlay = () => ({
+  color: nativeTheme.shouldUseDarkColors ? '#010409' : '#f6f8fa',
+  symbolColor: nativeTheme.shouldUseDarkColors ? '#9198a1' : '#59636e',
+  height: STRIP_HEIGHT - 1,
+})
 
 async function readSource(file) {
   try {
@@ -172,7 +178,7 @@ function cycleTab(step) {
 
 function layout() {
   const { width, height } = win.getContentBounds()
-  const top = stripHeight()
+  const top = STRIP_HEIGHT
   for (const tab of tabs) tab.view.setBounds({ x: 0, y: top, width, height: height - top })
   findBar.layout()
 }
@@ -199,8 +205,10 @@ function createWindow() {
     minHeight: 300,
     show: false,
     title: 'Oculis',
-    autoHideMenuBar: true,
     backgroundColor: backgroundColor(),
+    // 去掉原生标题栏, 标签栏即标题栏
+    titleBarStyle: 'hidden',
+    ...(isMac ? { trafficLightPosition: { x: 14, y: 12 } } : { titleBarOverlay: titleBarOverlay() }),
     // 打包后图标来自可执行文件, 开发时用 build/icon.png
     icon: app.isPackaged ? undefined : path.join(here, '..', 'build', 'icon.png'),
     // 窗口自身只承载标签栏, 文档在各标签页的视图里
@@ -225,9 +233,12 @@ function createWindow() {
     if (tab) closeTab(tab)
   })
   strip.ipc.on('focus-page', () => active?.view.webContents.focus())
+  // macOS 全屏时红绿灯隐藏, 标签栏不再为它留位置
+  win.on('enter-full-screen', () => strip.send('fullscreen', true))
+  win.on('leave-full-screen', () => strip.send('fullscreen', false))
   strip.loadFile(path.join(here, 'tabs.html'))
 
-  findBar = createFindBar(win, stripHeight)
+  findBar = createFindBar(win, STRIP_HEIGHT)
   win.on('resize', layout)
   win.on('closed', () => {
     for (const tab of tabs) destroyTab(tab)
@@ -248,7 +259,6 @@ function createWindow() {
 }
 
 function buildMenu() {
-  const isMac = process.platform === 'darwin'
   const template = [
     ...(isMac ? [{ role: 'appMenu' }] : []),
     {
@@ -304,6 +314,9 @@ if (!app.requestSingleInstanceLock()) {
   ipcMain.on('open-path', (_e, file) => file && openFile(file))
   ipcMain.on('open-dialog', showOpenDialog)
   ipcMain.on('rendered', (e) => e.sender === active?.view.webContents && findBar.refresh())
+
+  // 窗口按钮的配色跟随系统深浅色
+  nativeTheme.on('updated', () => !isMac && win?.setTitleBarOverlay(titleBarOverlay()))
 
   app.whenReady().then(() => {
     buildMenu()

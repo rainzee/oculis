@@ -27,7 +27,7 @@ No editing. No formatting. No saving. Oculis opens Markdown and renders it the w
 - Light and dark, following the system
 - Live reload that keeps your scroll position
 - Relative images, and `.md` links open in place
-- Tabs: opening another file joins the running window instead of a new one
+- Tabs in the title bar: opening another file joins the running window instead of a new one
 
 ## Run
 
@@ -51,4 +51,3 @@ bun run dist             # build an installer
 | `Esc` | Close find |
 | `Ctrl+=` `Ctrl+-` `Ctrl+0` | Zoom |
 | `F11` | Full screen |
-| `Alt` | Show the menu |

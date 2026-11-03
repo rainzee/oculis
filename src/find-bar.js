@@ -15,9 +15,9 @@ const isFindNext = (input) => input.key === 'F3' || ((input.control || input.met
  *
  * 查找栏放在独立的 WebContentsView 里, 若与文档同页,
  * findInPage 会把输入框里的文字也算作匹配并抢走焦点,
- * 查找对象是当前标签页, 由 setPage 切换, getTop 给出标签栏下沿
+ * 查找对象是当前标签页, 由 setPage 切换, top 为标签栏下沿
  */
-export function createFindBar(win, getTop) {
+export function createFindBar(win, top) {
   let page = null
   let view = null
   let query = ''
@@ -44,7 +44,7 @@ export function createFindBar(win, getTop) {
   function layout() {
     if (!view) return
     const { width } = win.getContentBounds()
-    view.setBounds({ x: width - WIDTH - RIGHT, y: getTop(), width: WIDTH, height: HEIGHT })
+    view.setBounds({ x: width - WIDTH - RIGHT, y: top, width: WIDTH, height: HEIGHT })
   }
 
   function createView() {

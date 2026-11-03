@@ -35,7 +35,10 @@ body {
   cursor: default;
 }
 
-/* 底边画在背景里, 当前标签的底色盖住它, 与下方文档相连 */
+/*
+ * 标签栏即标题栏, 空白处拖动窗口, 双击最大化
+ * 底边画在背景里, 当前标签的底色盖住它, 与下方文档相连
+ */
 nav {
   display: flex;
   height: 36px;
@@ -44,6 +47,17 @@ nav {
   box-shadow: inset 0 -1px var(--border);
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-app-region: drag;
+}
+
+/* Windows 与 Linux 的窗口按钮叠在右上角, 宽度取自 Window Controls Overlay */
+:root:not([data-platform='darwin']) nav {
+  padding-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 8px);
+}
+
+/* macOS 红绿灯在左上角, 全屏时隐藏 */
+:root[data-platform='darwin']:not(.fullscreen) nav {
+  padding-left: 80px;
 }
 
 .tab {
@@ -57,6 +71,7 @@ nav {
   border: 1px solid transparent;
   border-bottom: none;
   border-radius: 6px 6px 0 0;
+  -webkit-app-region: no-drag;
 }
 
 .tab span {

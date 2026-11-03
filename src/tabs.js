@@ -1,4 +1,9 @@
 const strip = document.getElementById('tabs')
+const root = document.documentElement
+
+// 标签栏即标题栏, 按平台给窗口按钮留位置
+root.dataset.platform = window.tabs.platform
+window.tabs.onFullscreen((on) => root.classList.toggle('fullscreen', on))
 
 // 关闭图标取自 GitHub Octicons
 const CLOSE_ICON =
