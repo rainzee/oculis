@@ -1,0 +1,122 @@
+/* 配色取自 GitHub Primer, 标签栏底色比文档深一级, 当前标签与文档连成一片 */
+:root {
+  color-scheme: light dark;
+  --bg: #f6f8fa;
+  --tab-bg: #ffffff;
+  --fg: #1f2328;
+  --fg-muted: #59636e;
+  --border: #d1d9e0;
+  --hover: #818b981a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #010409;
+    --tab-bg: #0d1117;
+    --fg: #f0f6fc;
+    --fg-muted: #9198a1;
+    --border: #3d444d;
+    --hover: #656c7633;
+  }
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: var(--bg);
+}
+
+body {
+  font: 12px -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  color: var(--fg-muted);
+  user-select: none;
+  cursor: default;
+}
+
+/*
+ * 标签栏即标题栏, 空白处拖动窗口, 双击最大化
+ * 底边画在背景里, 当前标签的底色盖住它, 与下方文档相连
+ */
+nav {
+  display: flex;
+  height: 36px;
+  padding: 6px 8px 0;
+  box-sizing: border-box;
+  box-shadow: inset 0 -1px var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-app-region: drag;
+}
+
+/* Windows 与 Linux 的窗口按钮叠在右上角, 宽度取自 Window Controls Overlay */
+:root:not([data-platform='darwin']) nav {
+  padding-right: calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 8px);
+}
+
+/* macOS 红绿灯在左上角, 全屏时隐藏 */
+:root[data-platform='darwin']:not(.fullscreen) nav {
+  padding-left: 80px;
+}
+
+.tab {
+  display: flex;
+  align-items: center;
+  flex: 0 1 200px;
+  min-width: 96px;
+  box-sizing: border-box;
+  padding: 0 4px 0 12px;
+  gap: 4px;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  -webkit-app-region: no-drag;
+}
+
+.tab span {
+  flex: 1;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.tab:hover {
+  color: var(--fg);
+}
+
+.tab[aria-selected='true'] {
+  color: var(--fg);
+  background: var(--tab-bg);
+  border-color: var(--border);
+}
+
+.close {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  color: var(--fg-muted);
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  visibility: hidden;
+}
+
+.tab:hover .close,
+.tab[aria-selected='true'] .close {
+  visibility: visible;
+}
+
+.close:hover {
+  color: var(--fg);
+  background: var(--hover);
+}
+
+.close svg {
+  width: 12px;
+  height: 12px;
+  fill: currentColor;
+}
